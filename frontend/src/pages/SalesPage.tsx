@@ -9,6 +9,7 @@ import {
   MenuItem,
   TextField,
   Typography,
+  Chip,
 } from "@mui/material";
 import { Add, Delete, Edit, MoreVert, Refresh, Visibility } from "@mui/icons-material";
 import { useEffect, useMemo, useState } from "react";
@@ -181,6 +182,12 @@ export function SalesPage() {
   const tokenRole = getRoleFromToken(token);
   const canManageSales = tokenRole === RoleName.ADMIN || tokenRole === RoleName.ADVISOR;
 
+  const statusColorMap: Record<SaleStatus, "info" | "warning" | "success"> = {
+    [SaleStatus.OPEN]: "info",
+    [SaleStatus.IN_PROGRESS]: "warning",
+    [SaleStatus.CLOSED]: "success",
+  };
+
   return (
     <Box>
       <Typography variant="h4" gutterBottom>
@@ -333,7 +340,7 @@ export function SalesPage() {
                       {sale.createdBy.name}
                     </Box>
                     <Box component="td" sx={{ borderBottom: "1px solid #f0f0f0", py: 1 }}>
-                      {sale.status}
+                      <Chip label={sale.status} size="small" color={statusColorMap[sale.status]} />
                     </Box>
                     <Box component="td" sx={{ borderBottom: "1px solid #f0f0f0", py: 1 }}>
                       <Box display="flex" gap={0.5}>
