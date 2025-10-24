@@ -1,15 +1,32 @@
-import { describe, it, expect } from 'vitest';
-import { render, screen } from '@testing-library/react';
-import { BrowserRouter } from 'react-router-dom';
+import { describe, it, expect, vi } from 'vitest';
+import { render } from '@testing-library/react';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
-import { RequireAuth } from '../routes/RequireAuth';
 import { authReducer } from '../features/auth/authSlice';
+import { salesReducer } from '../features/sales/salesSlice';
+import { usersReducer } from '../features/users/usersSlice';
+import { uiReducer } from '../features/ui/uiSlice';
+import { captchaReducer } from '../features/captcha/captchaSlice';
+
+// Mock del módulo jwt ANTES de importar RequireAuth
+vi.mock('../utils/jwt', () => ({
+  isTokenExpired: vi.fn(),
+  decodeJwt: vi.fn(),
+  getRoleFromToken: vi.fn(),
+}));
+
+import { isTokenExpired } from '../utils/jwt';
+import { RequireAuth } from '../routes/RequireAuth';
 
 const createMockStore = (initialState: any) => {
   return configureStore({
     reducer: {
       auth: authReducer,
+      sales: salesReducer,
+      users: usersReducer,
+      ui: uiReducer,
+      captcha: captchaReducer,
     },
     preloadedState: initialState,
   });
@@ -17,17 +34,30 @@ const createMockStore = (initialState: any) => {
 
 describe('RequireAuth', () => {
   it('should redirect to /login if no token', () => {
-    const store = createMockStore({ auth: { token: null, user: null, status: 'idle', error: null } });
+    vi.mocked(isTokenExpired).mockReturnValue(true);
     
-    render(
+    const store = createMockStore({
+      auth: { token: null, user: null, status: 'idle', error: null },
+      sales: { list: [], totalRequestedAmount: 0, totalCount: 0, currentPage: 1, pageSize: 10, selectedSale: null, status: 'idle', error: null },
+      users: { list: [], status: 'idle', error: null },
+      ui: { snackbar: { open: false, message: '', severity: 'info' } },
+      captcha: { captcha: null, status: 'idle', error: null },
+    });
+
+    const result = render(
       <Provider store={store}>
         <BrowserRouter>
-          <RequireAuth />
+          <Routes>
+            <Route path="/" element={<RequireAuth />}>
+              <Route index element={<div>Protected Content</div>} />
+            </Route>
+            <Route path="/login" element={<div>Login Page</div>} />
+          </Routes>
         </BrowserRouter>
       </Provider>
     );
-    
-    // No debe renderizar el contenido protegido
-    expect(screen.queryByText(/Protected content/i)).not.toBeInTheDocument();
+
+    // Debe mostrar la página de login
+    expect(result.container.textContent).toContain('Login Page');
   });
 });

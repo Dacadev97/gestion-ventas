@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.authorize = exports.authenticate = void 0;
+const jsonwebtoken_1 = require("jsonwebtoken");
 const AppError_1 = require("../errors/AppError");
 const jwt_1 = require("../utils/jwt");
 const authenticate = (req, _res, next) => {
@@ -8,14 +9,22 @@ const authenticate = (req, _res, next) => {
     if (!header || !header.startsWith("Bearer ")) {
         throw new AppError_1.AppError("Token de autenticación requerido", 401);
     }
-    const token = header.replace("Bearer ", "");
-    const payload = (0, jwt_1.verifyAccessToken)(token);
-    req.user = {
-        id: payload.sub,
-        email: payload.email,
-        role: payload.role,
-    };
-    next();
+    try {
+        const token = header.replace("Bearer ", "");
+        const payload = (0, jwt_1.verifyAccessToken)(token);
+        req.user = {
+            id: payload.sub,
+            email: payload.email,
+            role: payload.role,
+        };
+        next();
+    }
+    catch (error) {
+        if (error instanceof jsonwebtoken_1.TokenExpiredError || error instanceof jsonwebtoken_1.JsonWebTokenError) {
+            throw new AppError_1.AppError("Token inválido o expirado", 401);
+        }
+        throw error;
+    }
 };
 exports.authenticate = authenticate;
 const authorize = (...roles) => (req, _res, next) => {

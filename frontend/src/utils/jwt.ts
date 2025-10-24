@@ -46,7 +46,7 @@ export const isTokenExpired = (token: string | null | undefined): boolean => {
   if (!token) return true;
   const claims = decodeJwt(token);
   if (!claims) return true;
-  if (!claims.exp) return false;
+  if (!claims.exp) return true; // Si no tiene exp, considerarlo como expirado
   const now = Math.floor(Date.now() / 1000);
   return claims.exp < now;
 };

@@ -9,7 +9,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Sale = exports.FranchiseType = exports.ProductType = void 0;
+exports.Sale = exports.SaleStatus = exports.FranchiseType = exports.ProductType = void 0;
 const typeorm_1 = require("typeorm");
 const User_1 = require("./User");
 const transformers_1 = require("../utils/transformers");
@@ -25,6 +25,12 @@ var FranchiseType;
     FranchiseType["VISA"] = "VISA";
     FranchiseType["MASTERCARD"] = "MASTERCARD";
 })(FranchiseType || (exports.FranchiseType = FranchiseType = {}));
+var SaleStatus;
+(function (SaleStatus) {
+    SaleStatus["OPEN"] = "Abierto";
+    SaleStatus["IN_PROGRESS"] = "En Proceso";
+    SaleStatus["CLOSED"] = "Finalizado";
+})(SaleStatus || (exports.SaleStatus = SaleStatus = {}));
 let Sale = class Sale {
 };
 exports.Sale = Sale;
@@ -36,6 +42,10 @@ __decorate([
     (0, typeorm_1.Column)({ type: "enum", enum: ProductType }),
     __metadata("design:type", String)
 ], Sale.prototype, "product", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: "enum", enum: SaleStatus, default: SaleStatus.OPEN }),
+    __metadata("design:type", String)
+], Sale.prototype, "status", void 0);
 __decorate([
     (0, typeorm_1.Column)({ name: "requested_amount", type: "numeric", precision: 15, scale: 2, transformer: transformers_1.decimalTransformer }),
     __metadata("design:type", Number)

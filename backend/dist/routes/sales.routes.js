@@ -13,8 +13,10 @@ exports.saleRouter = router;
 const controller = new SaleController_1.SaleController();
 router.use(authMiddleware_1.authenticate, (0, authMiddleware_1.authorize)(Role_1.RoleName.ADMIN, Role_1.RoleName.ADVISOR));
 router.get("/", saleValidators_1.saleFiltersValidator, validationMiddleware_1.validateRequest, (0, asyncHandler_1.asyncHandler)(controller.list));
+router.get("/stats", (0, asyncHandler_1.asyncHandler)(controller.stats));
 router.get("/:id", (0, asyncHandler_1.asyncHandler)(controller.getById));
 router.post("/", saleValidators_1.createSaleValidator, validationMiddleware_1.validateRequest, (0, asyncHandler_1.asyncHandler)(controller.create));
 router.put("/:id", saleValidators_1.updateSaleValidator, validationMiddleware_1.validateRequest, (0, asyncHandler_1.asyncHandler)(controller.update));
+router.patch("/:id/status", (0, asyncHandler_1.asyncHandler)(controller.updateStatus));
 router.delete("/:id", (0, asyncHandler_1.asyncHandler)(controller.delete));
 //# sourceMappingURL=sales.routes.js.map

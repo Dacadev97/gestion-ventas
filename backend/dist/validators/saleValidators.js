@@ -55,6 +55,24 @@ exports.saleFiltersValidator = [
         .isISO8601()
         .withMessage("La fecha final debe tener un formato válido")
         .toDate(),
+    (0, express_validator_1.query)("page")
+        .optional({ values: "falsy" })
+        .isInt({ min: 1 })
+        .withMessage("La página debe ser un número entero mayor a 0")
+        .toInt(),
+    (0, express_validator_1.query)("limit")
+        .optional({ values: "falsy" })
+        .isInt({ min: 1, max: 100 })
+        .withMessage("El límite debe ser un número entero entre 1 y 100")
+        .toInt(),
+    (0, express_validator_1.query)("sortBy")
+        .optional({ values: "falsy" })
+        .isIn(["created_at", "requested_amount", "product", "status"])
+        .withMessage("Ordenamiento solo por: created_at, requested_amount, product, status"),
+    (0, express_validator_1.query)("sortOrder")
+        .optional({ values: "falsy" })
+        .isIn(["ASC", "DESC"])
+        .withMessage("Orden debe ser ASC o DESC"),
 ];
 const baseSaleBodyValidators = [
     (0, express_validator_1.body)("product")
