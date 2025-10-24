@@ -16,7 +16,6 @@ import type {
   ProductType,
   SalesListResponse,
 } from "../../types";
-import type { RootState } from "../../store";
 
 type SalesStatus = "idle" | "loading" | "succeeded" | "failed";
 
