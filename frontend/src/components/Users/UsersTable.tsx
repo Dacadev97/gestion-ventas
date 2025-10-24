@@ -14,7 +14,6 @@ import {
 import { Delete, Edit } from "@mui/icons-material";
 import type { User } from "../../types";
 import { formatDateTime } from "../../utils/format";
-import { RoleName } from "../../types";
 
 interface UsersTableProps {
   users: User[];
@@ -24,11 +23,11 @@ interface UsersTableProps {
 
 const getRoleColor = (role: string): "default" | "primary" | "secondary" | "error" | "info" | "success" | "warning" => {
   switch (role) {
-    case RoleName.ADMIN:
+    case "Administrador":
       return "error";
-    case RoleName.ADVISOR:
+    case "Asesor":
       return "primary";
-    case RoleName.VIEWER:
+    case "Viewer":
       return "info";
     default:
       return "default";
@@ -51,11 +50,7 @@ export function UsersTable({ users, onEdit, onDelete }: UsersTableProps) {
         </TableHead>
         <TableBody>
           {users.map((user) => {
-            const roleText = typeof user.role === "string"
-              ? user.role
-              : typeof user.role === "object" && user.role !== null
-                ? user.role.name ?? "-"
-                : "-";
+            const roleText = user.role || "-";
             
             return (
               <TableRow 
