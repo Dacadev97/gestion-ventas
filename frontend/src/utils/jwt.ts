@@ -45,8 +45,8 @@ export const getRoleFromToken = (token: string | null | undefined): string | nul
 export const isTokenExpired = (token: string | null | undefined): boolean => {
   if (!token) return true;
   const claims = decodeJwt(token);
-  if (!claims) return true; // token ilegible -> tratar como inválido
-  if (!claims.exp) return false; // si no hay exp, no bloqueamos solo por UI
+  if (!claims) return true;
+  if (!claims.exp) return false;
   const now = Math.floor(Date.now() / 1000);
   return claims.exp < now;
 };
