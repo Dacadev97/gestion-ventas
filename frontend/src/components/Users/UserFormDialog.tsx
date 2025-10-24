@@ -59,7 +59,7 @@ export function UserFormDialog({ open, initialValues, isEdit = false, onClose, o
         name: initialValues.name,
         email: initialValues.email,
         password: "",
-        role: typeof initialValues.role === "string" ? initialValues.role : initialValues.role.name,
+        role: initialValues.role,
       });
     }
   }, [initialValues, reset]);
