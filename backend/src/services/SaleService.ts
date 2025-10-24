@@ -2,7 +2,7 @@ import { Repository, SelectQueryBuilder } from "typeorm";
 
 import { AppDataSource } from "../data-source";
 import { AppError } from "../errors/AppError";
-import { FranchiseType, ProductType, Sale } from "../entities/Sale";
+import { FranchiseType, ProductType, Sale, SaleStatus } from "../entities/Sale";
 import { RoleName } from "../entities/Role";
 import { User } from "../entities/User";
 
