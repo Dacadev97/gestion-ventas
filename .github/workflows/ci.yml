@@ -9,6 +9,22 @@ on:
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: test_user
+          POSTGRES_PASSWORD: test_password
+          POSTGRES_DB: test_db
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+    
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -57,3 +73,11 @@ jobs:
       - name: Run backend tests
         run: npm test
         working-directory: backend
+        env:
+          NODE_ENV: test
+          DB_HOST: localhost
+          DB_PORT: 5432
+          DB_USERNAME: test_user
+          DB_PASSWORD: test_password
+          DB_NAME: test_db
+          JWT_SECRET: test-secret-key-for-ci
