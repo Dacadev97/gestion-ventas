@@ -26,11 +26,10 @@ jobs:
 
       - name: Set up gcloud
         uses: google-github-actions/setup-gcloud@v2
-        with:
-          project_id: ${{ secrets.GCP_PROJECT_ID }}
 
       - name: Configure Docker for Artifact Registry
-        run: gcloud auth configure-docker ${{ secrets.CLOUD_RUN_REGION }}-docker.pkg.dev --quiet
+        run: |
+          gcloud auth configure-docker ${{ secrets.CLOUD_RUN_REGION }}-docker.pkg.dev --quiet
 
       - name: Build and push image
         working-directory: backend
