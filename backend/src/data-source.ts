@@ -15,6 +15,6 @@ export const AppDataSource = new DataSource({
   password: env.db.password,
   database: env.db.database,
   entities: [Role, User, Sale],
-  synchronize: env.nodeEnv !== "production",
+  synchronize: true,
   logging: env.nodeEnv !== "production",
 });
