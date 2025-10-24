@@ -424,45 +424,81 @@ Se ejecuta en cada push y pull request:
 - Lint (ESLint)
 - Build (TypeScript compilation)
 - Tests (Jest + Vitest)
+- PostgreSQL service para tests de integración
 ```
 
 #### 2. Deploy Cloud Run (`.github/workflows/deploy-cloudrun.yml`)
 
 Despliegue automático a Google Cloud Run:
 
-**Secretos requeridos:**
-- `GCP_PROJECT_ID`: ID del proyecto GCP
-- `GCP_SA_KEY`: Service Account key (JSON)
-- `CLOUD_RUN_SERVICE`: Nombre del servicio
-- `CLOUD_RUN_REGION`: Región (ej: us-central1)
-
-## 🌐 Despliegue en Cloud Run (opcional)
-
-### Prerrequisitos
-
-1. Proyecto en Google Cloud Platform
-2. Cloud Run API habilitada
-3. Service Account con permisos
-
-### Configuración
-
+**Configuración rápida:**
 ```bash
-# 1. Construir imagen Docker del backend
-docker build -t gcr.io/[PROJECT-ID]/konecta-backend ./backend
+# Opción 1: Script automatizado (recomendado)
+./setup-gcp.sh
 
-# 2. Push a Google Container Registry
-docker push gcr.io/[PROJECT-ID]/konecta-backend
-
-# 3. Desplegar a Cloud Run
-gcloud run deploy konecta-backend \
-  --image gcr.io/[PROJECT-ID]/konecta-backend \
-  --platform managed \
-  --region us-central1 \
-  --allow-unauthenticated \
-  --set-env-vars="JWT_SECRET=...,DB_HOST=..."
+# Opción 2: Manual - Ver DEPLOYMENT_GUIDE.md
 ```
 
-**Nota**: Considera usar Cloud SQL para PostgreSQL en producción.
+**Secretos requeridos en GitHub:**
+- `GCP_SA_KEY`: Service Account key (JSON completo)
+- `GCP_PROJECT_ID`: tech-dx-471318
+- `CLOUD_RUN_REGION`: us-central1
+- `CLOUD_RUN_SERVICE`: konecta-backend
+- `ARTIFACT_REGISTRY_REPO`: konecta-repo
+- `CLOUD_SQL_CONNECTION_NAME`: tech-dx-471318:us-central1:konecta-db
+- `BACKEND_ENV_VARS`: Variables de entorno (ver guía)
+
+**📚 Documentación completa:**
+- **[QUICKSTART_GCP.md](./QUICKSTART_GCP.md)** - Setup rápido con script automatizado
+- **[DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md)** - Guía completa paso a paso
+
+## 🌐 Despliegue en Google Cloud Run
+
+### Setup Automático ⚡
+
+El proyecto incluye un script de configuración automatizada que crea toda la infraestructura necesaria:
+
+```bash
+# Ejecutar script de configuración
+./setup-gcp.sh
+```
+
+El script creará automáticamente:
+- ✅ Cloud SQL (PostgreSQL 14)
+- ✅ Artifact Registry para imágenes Docker
+- ✅ Service Account con permisos
+- ✅ Passwords seguros generados automáticamente
+- ✅ Archivo con todos los secrets para GitHub
+
+### Deployment Manual
+
+Si prefieres configurar manualmente o necesitas más control:
+
+1. **Lee la guía completa**: [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md)
+2. **Quick Start**: [QUICKSTART_GCP.md](./QUICKSTART_GCP.md)
+
+### Verificar Deployment
+
+```bash
+# Ver servicios desplegados
+gcloud run services list --platform managed
+
+# Obtener URL del servicio
+gcloud run services describe konecta-backend \
+  --region us-central1 \
+  --format "value(status.url)"
+
+# Probar endpoint
+curl $(gcloud run services describe konecta-backend \
+  --region us-central1 \
+  --format "value(status.url)")/health
+```
+
+### Costos Estimados
+
+- **Cloud Run**: GRATIS hasta 2M requests/mes
+- **Cloud SQL (db-f1-micro)**: ~$7-10 USD/mes
+- **Total estimado**: $7-15 USD/mes
 
 ## 👥 Usuarios por Defecto
 
@@ -509,8 +545,7 @@ Este proyecto es de uso educativo y demostrativo.
 
 ## 👨‍💻 Autor
 
-**Daniel Cano** - [Dacadev97](https://github.com/Dacadev97)
+**Davidson Cadavid** - [Dacadev97](https://github.com/Dacadev97)
 
 ---
 
-⭐ Si este proyecto te ha sido útil, considera darle una estrella en GitHub
