@@ -1,0 +1,1 @@
+{"version":3,"file":"CaptchaController.js","sourceRoot":"","sources":["../../../src/controllers/CaptchaController.ts"],"names":[],"mappings":";;;AAEA,0CAA6C;AAE7C,MAAa,iBAAiB;IAA9B;QACE,aAAQ,GAAG,KAAK,EAAE,IAAa,EAAE,GAAa,EAAE,EAAE;YAChD,MAAM,OAAO,GAAG,yBAAc,CAAC,QAAQ,EAAE,CAAC;YAE1C,GAAG,CAAC,IAAI,CAAC,OAAO,CAAC,CAAC;QACpB,CAAC,CAAC;IACJ,CAAC;CAAA;AAND,8CAMC"}

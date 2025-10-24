@@ -6,7 +6,7 @@
     "module": "commonjs",
     "target": "es2020",
     "lib": ["es2020"],
-    "moduleResolution": "bundler",
+    "moduleResolution": "node10",
     "types": ["node", "jest"],
     "typeRoots": ["./node_modules/@types", "./src/types"],
 
@@ -19,7 +19,7 @@
     "emitDecoratorMetadata": true,
 
     "strict": true,
-    "skipLibCheck": true,
+    "skipLibCheck": true
   },
   "include": ["src/**/*", "__tests__/**/*", "jest.config.ts"],
   "exclude": ["node_modules", "dist"]
