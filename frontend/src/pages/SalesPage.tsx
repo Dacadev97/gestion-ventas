@@ -24,6 +24,7 @@ import {
   updateSaleThunk,
 } from "../features/sales/salesSlice.ts";
 import { ProductType, RoleName, SaleStatus } from "../types";
+import { getRoleFromToken } from "../utils/jwt.ts";
 import type { Sale } from "../types";
 import { SaleFormDialog } from "../components/Sales/SaleFormDialog.tsx";
 import type { SaleFormValues } from "../components/Sales/SaleFormDialog.tsx";
@@ -43,7 +44,7 @@ export function SalesPage() {
   const salesState = useAppSelector((state) => state.sales);
   const authState = useAppSelector((state) => state.auth);
   const { list, totalRequestedAmount, status } = salesState;
-  const { user } = authState;
+  const { token } = authState;
   const [selectedSale, setSelectedSale] = useState<Sale | null>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
@@ -177,7 +178,8 @@ export function SalesPage() {
 
   const filteredSales = useMemo(() => list, [list]);
 
-  const canManageSales = user?.role === RoleName.ADMIN || user?.role === RoleName.ADVISOR;
+  const tokenRole = getRoleFromToken(token);
+  const canManageSales = tokenRole === RoleName.ADMIN || tokenRole === RoleName.ADVISOR;
 
   return (
     <Box>

@@ -24,6 +24,7 @@ import type { LoginPayload } from "../types/index.ts";
 import { fetchSalesThunk } from "../features/sales/salesSlice.ts";
 import { fetchUsersThunk } from "../features/users/usersSlice.ts";
 import { RoleName } from "../types/index.ts";
+import { getRoleFromToken } from "../utils/jwt.ts";
 
 const schema = z.object({
   email: z.string().email("Correo electrónico inválido"),
@@ -35,7 +36,7 @@ const schema = z.object({
 export function LoginPage() {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const { status, error, user } = useAppSelector((state) => state.auth);
+  const { status, error, user, token } = useAppSelector((state) => state.auth);
   const captcha = useAppSelector((state) => state.captcha.current);
   const captchaStatus = useAppSelector((state) => state.captcha.status);
   const [showPassword, setShowPassword] = useState(false);
@@ -43,7 +44,6 @@ export function LoginPage() {
   const {
     control,
     handleSubmit,
-    reset,
     setValue,
     formState: { errors },
   } = useForm<LoginPayload>({
@@ -69,12 +69,13 @@ export function LoginPage() {
   useEffect(() => {
     if (user) {
       dispatch(fetchSalesThunk());
-      if (user.role === RoleName.ADMIN) {
+      const tokenRole = getRoleFromToken(token);
+      if (tokenRole === RoleName.ADMIN) {
         dispatch(fetchUsersThunk());
       }
       navigate("/", { replace: true });
     }
-  }, [user, navigate, dispatch]);
+  }, [user, token, navigate, dispatch]);
 
   const onSubmit = (data: LoginPayload) => {
     const payload: LoginPayload = {

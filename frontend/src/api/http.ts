@@ -2,6 +2,7 @@ import axios, { type AxiosError } from "axios";
 import type { EnhancedStore } from "@reduxjs/toolkit";
 
 import { logout } from "../features/auth/authSlice";
+import { showSnackbar } from "../features/ui/uiSlice";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:4000/api";
 
@@ -28,6 +29,14 @@ export const setupInterceptors = (store: EnhancedStore) => {
       if (error.response?.status === 401) {
         store.dispatch(logout());
         window.location.href = "/login";
+      }
+
+      if (error.response?.status === 403) {
+        store.dispatch(
+          showSnackbar({ message: "No tienes permisos para realizar esta acción", severity: "warning" })
+        );
+        // Redirigir a inicio si la ruta actual es sensible
+        // Evitamos bucles de redirección forzada; la UI decide en la mayoría de casos
       }
 
       return Promise.reject(error);

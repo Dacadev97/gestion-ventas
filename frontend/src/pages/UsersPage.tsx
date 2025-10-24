@@ -18,6 +18,7 @@ import {
   updateUserThunk,
 } from "../features/users/usersSlice.ts";
 import { RoleName } from "../types/index.ts";
+import { getRoleFromToken } from "../utils/jwt.ts";
 import type { User } from "../types/index.ts";
 import { UserFormDialog } from "../components/Users/UserFormDialog.tsx";
 import type { UserFormValues } from "../components/Users/UserFormDialog.tsx";
@@ -30,7 +31,7 @@ export function UsersPage() {
   const usersState = useAppSelector((state) => state.users);
   const authState = useAppSelector((state) => state.auth);
   const { items, status } = usersState;
-  const { user } = authState;
+  const { token } = authState;
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
@@ -43,7 +44,8 @@ export function UsersPage() {
     };
   }, [dispatch]);
 
-  const canManageUsers = user?.role === RoleName.ADMIN;
+  const tokenRole = getRoleFromToken(token);
+  const canManageUsers = tokenRole === RoleName.ADMIN;
 
   if (!canManageUsers) {
     return (
@@ -164,7 +166,7 @@ export function UsersPage() {
           name: selectedUser.name,
           email: selectedUser.email,
           password: "",
-          role: typeof selectedUser.role === "string" ? selectedUser.role : selectedUser.role.name,
+          role: selectedUser.role,
         } : undefined}
         onClose={() => {
           setIsFormOpen(false);

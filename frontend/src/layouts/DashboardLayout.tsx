@@ -19,6 +19,8 @@ import { Link as RouterLink, Outlet, useLocation, useNavigate } from "react-rout
 
 import { useAppDispatch, useAppSelector } from "../hooks/index.ts";
 import { logout } from "../features/auth/authSlice.ts";
+import { getRoleFromToken } from "../utils/jwt.ts";
+import { RoleName } from "../types/index.ts";
 
 const drawerWidth = 240;
 const collapsedWidth = 72;
@@ -29,7 +31,8 @@ export function DashboardLayout() {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const location = useLocation();
-  const { user } = useAppSelector((state) => state.auth);
+  const { user, token } = useAppSelector((state) => state.auth);
+  const tokenRole = getRoleFromToken(token);
 
   useEffect(() => {
     // Redirect to login if there's no user (session expired or not logged in)
@@ -84,7 +87,7 @@ export function DashboardLayout() {
           </ListItemIcon>
           {!collapsed && <ListItemText primary="Ventas" />}
         </ListItemButton>
-        {user.role === "Administrador" && (
+        {tokenRole === RoleName.ADMIN && (
           <ListItemButton
             component={RouterLink}
             to="/users"
