@@ -2,6 +2,11 @@ name: Deploy Backend to Cloud Run
 
 on:
   workflow_dispatch:
+  workflow_run:
+    workflows: ["CI"]
+    types:
+      - completed
+    branches: [ main ]
   push:
     branches: [ main ]
     paths:
@@ -11,6 +16,8 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    # Solo ejecutar si el workflow CI fue exitoso o si es manual
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     permissions:
       contents: 'read'
       id-token: 'write'
