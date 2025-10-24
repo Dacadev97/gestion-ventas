@@ -1,4 +1,4 @@
-import { Logout, Menu as MenuIcon, PointOfSale, People } from "@mui/icons-material";
+import { Logout, Menu as MenuIcon, PointOfSale, People, BarChart } from "@mui/icons-material";
 import {
   AppBar,
   Box,
@@ -85,7 +85,7 @@ export function DashboardLayout() {
           <ListItemIcon sx={{ minWidth: 0, mr: collapsed ? 0 : 2, justifyContent: "center" }}>
             <PointOfSale fontSize="small" />
           </ListItemIcon>
-          {!collapsed && <ListItemText primary="Ventas" />}
+          {!collapsed && <ListItemText primary="Radicar Venta" />}
         </ListItemButton>
         {tokenRole === RoleName.ADMIN && (
           <ListItemButton
@@ -103,6 +103,20 @@ export function DashboardLayout() {
             {!collapsed && <ListItemText primary="Usuarios" />}
           </ListItemButton>
         )}
+        <ListItemButton
+          component={RouterLink}
+          to="/stats"
+          selected={location.pathname === "/stats"}
+          sx={{
+            justifyContent: collapsed ? "center" : "flex-start",
+            px: collapsed ? 2 : 3,
+          }}
+        >
+          <ListItemIcon sx={{ minWidth: 0, mr: collapsed ? 0 : 2, justifyContent: "center" }}>
+            <BarChart fontSize="small" />
+          </ListItemIcon>
+          {!collapsed && <ListItemText primary="Estadísticas" />}
+        </ListItemButton>
       </List>
     </Box>
   );

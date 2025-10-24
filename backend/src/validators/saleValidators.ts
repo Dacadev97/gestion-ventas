@@ -64,6 +64,24 @@ export const saleFiltersValidator = [
     .isISO8601()
     .withMessage("La fecha final debe tener un formato válido")
     .toDate(),
+  query("page")
+    .optional({ values: "falsy" })
+    .isInt({ min: 1 })
+    .withMessage("La página debe ser un número entero mayor a 0")
+    .toInt(),
+  query("limit")
+    .optional({ values: "falsy" })
+    .isInt({ min: 1, max: 100 })
+    .withMessage("El límite debe ser un número entero entre 1 y 100")
+    .toInt(),
+  query("sortBy")
+    .optional({ values: "falsy" })
+    .isIn(["created_at", "requested_amount", "product", "status"])
+    .withMessage("Ordenamiento solo por: created_at, requested_amount, product, status"),
+  query("sortOrder")
+    .optional({ values: "falsy" })
+    .isIn(["ASC", "DESC"])
+    .withMessage("Orden debe ser ASC o DESC"),
 ];
 
 const baseSaleBodyValidators = [

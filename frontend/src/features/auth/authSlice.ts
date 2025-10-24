@@ -2,12 +2,12 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import axios from "axios";
 
-import { login } from "../../api/auth.ts";
-import { fetchSalesThunk } from "../sales/salesSlice.ts";
-import { fetchUsersThunk } from "../users/usersSlice.ts";
+import { getMe, login } from "../../api/auth.ts";
+// import { fetchSalesThunk } from "../sales/salesSlice.ts";
+// import { fetchUsersThunk } from "../users/usersSlice.ts";
 import { showSnackbar } from "../ui/uiSlice.ts";
 import type { AuthResponse, LoginPayload, User } from "../../types/index.ts";
-import { RoleName } from "../../types/index.ts";
+// import { RoleName } from "../../types/index.ts";
 
 type AuthStatus = "idle" | "loading" | "succeeded" | "failed";
 
@@ -73,6 +73,24 @@ export const loginThunk = createAsyncThunk<AuthResponse, LoginPayload>(
   },
 );
 
+export const fetchMeThunk = createAsyncThunk<User>(
+  "auth/me",
+  async (_, { rejectWithValue }) => {
+    try {
+      const user = await getMe();
+      return user;
+    } catch (error: unknown) {
+      let message = "No fue posible recuperar el usuario";
+      if (axios.isAxiosError(error)) {
+        message = (error.response?.data as { message?: string })?.message ?? error.message;
+      } else if (error instanceof Error) {
+        message = error.message;
+      }
+      return rejectWithValue(message);
+    }
+  },
+);
+
 const persistAuth = ({ token, user }: { token: string | null; user: User | null }) => {
   if (token && user) {
     localStorage.setItem(AUTH_TOKEN_KEY, token);
@@ -115,6 +133,10 @@ const authSlice = createSlice({
       .addCase(loginThunk.rejected, (state, action) => {
         state.status = "failed";
         state.error = (action.payload as string) ?? "No se pudo iniciar sesión";
+      })
+      .addCase(fetchMeThunk.fulfilled, (state, action) => {
+        state.user = action.payload;
+        persistAuth({ token: state.token, user: state.user });
       });
   },
 });

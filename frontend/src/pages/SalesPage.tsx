@@ -10,6 +10,7 @@ import {
   TextField,
   Typography,
   Chip,
+  Pagination,
 } from "@mui/material";
 import { Add, Delete, Edit, MoreVert, Refresh, Visibility } from "@mui/icons-material";
 import { useEffect, useMemo, useState } from "react";
@@ -52,6 +53,8 @@ export function SalesPage() {
   const [detailSale, setDetailSale] = useState<Sale | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [statusMenuAnchorEl, setStatusMenuAnchorEl] = useState<null | HTMLElement>(null);
+  const [page, setPage] = useState(1);
+  const [limit] = useState(10);
 
   const handleOpenStatusMenu = (event: React.MouseEvent<HTMLButtonElement>, sale: Sale) => {
     setSelectedSale(sale);

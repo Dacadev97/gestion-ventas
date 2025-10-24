@@ -57,4 +57,15 @@ export class AuthController {
       user: mapUserResponse(responseUser),
     });
   };
+
+  me = async (req: Request, res: Response) => {
+    const authUser = req.user;
+
+    if (!authUser) {
+      throw new AppError("No autorizado", 401);
+    }
+
+    const user = await this.userService.getById(authUser.id);
+    return res.json(mapUserResponse(user));
+  };
 }

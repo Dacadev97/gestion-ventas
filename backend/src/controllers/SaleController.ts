@@ -19,10 +19,14 @@ export class SaleController {
       throw new AppError("No autorizado", 401);
     }
 
-    const { product, createdFrom, createdTo } = req.query as {
+    const { product, createdFrom, createdTo, page, limit, sortBy, sortOrder } = req.query as {
       product?: ProductType;
       createdFrom?: string;
       createdTo?: string;
+      page?: string;
+      limit?: string;
+      sortBy?: string;
+      sortOrder?: "ASC" | "DESC";
     };
 
     const filters = {
@@ -30,16 +34,24 @@ export class SaleController {
       createdFrom: createdFrom ? new Date(createdFrom) : undefined,
       createdTo: createdTo ? new Date(createdTo) : undefined,
       createdById: user.role === RoleName.ADVISOR ? user.id : undefined,
+      page: page ? Number(page) : undefined,
+      limit: limit ? Number(limit) : undefined,
+      sortBy,
+      sortOrder,
     };
 
-    const [sales, total] = await Promise.all([
+    const [sales, total, count] = await Promise.all([
       this.saleService.list(filters),
       this.saleService.totalRequested(filters),
+      this.saleService.count(filters),
     ]);
 
     res.json({
       totalRequestedAmount: total,
       data: sales,
+      count,
+      page: filters.page,
+      limit: filters.limit,
     });
   };
 
@@ -170,5 +182,19 @@ export class SaleController {
     const sale = await this.saleService.updateStatus(id, status, currentUser);
 
     res.json(sale);
+  };
+
+  stats = async (_req: Request, res: Response) => {
+    const [salesByAdvisor, amountByProduct, salesByDate] = await Promise.all([
+      this.saleService.statsByAdvisor(),
+      this.saleService.statsByProduct(),
+      this.saleService.statsByDate(),
+    ]);
+
+    res.json({
+      salesByAdvisor,
+      amountByProduct,
+      salesByDate,
+    });
   };
 }

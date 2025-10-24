@@ -18,6 +18,10 @@ interface SaleFilters {
   createdFrom?: Date;
   createdTo?: Date;
   createdById?: number;
+  page?: number;
+  limit?: number;
+  sortBy?: string;
+  sortOrder?: "ASC" | "DESC";
 }
 
 export class SaleService {
@@ -29,6 +33,16 @@ export class SaleService {
 
   async list(filters: SaleFilters = {}): Promise<Sale[]> {
     const qb = this.applyFilters(this.baseQuery(), filters);
+
+    if (filters.sortBy) {
+      const order = filters.sortOrder ?? "DESC";
+      qb.orderBy(`sale.${filters.sortBy}`, order);
+    }
+
+    if (filters.page && filters.limit) {
+      const skip = (filters.page - 1) * filters.limit;
+      qb.skip(skip).take(filters.limit);
+    }
 
     return qb.getMany();
   }
@@ -105,6 +119,15 @@ export class SaleService {
     return Number(result?.total ?? 0);
   }
 
+  async count(filters: SaleFilters = {}): Promise<number> {
+    const qb = this.applyFilters(
+      this.saleRepository.createQueryBuilder("sale").leftJoin("sale.createdBy", "createdBy"),
+      filters,
+    );
+
+    return qb.getCount();
+  }
+
   private baseQuery(): SelectQueryBuilder<Sale> {
     return this.saleRepository
       .createQueryBuilder("sale")
@@ -143,5 +166,60 @@ export class SaleService {
     if (sale.createdBy.id !== user.id) {
       throw new AppError("No tienes permisos para modificar esta venta", 403);
     }
+  }
+
+  async statsByAdvisor(): Promise<{ advisorId: number; advisorName: string; count: number; total: number }[]> {
+    const result = await this.saleRepository
+      .createQueryBuilder("sale")
+      .leftJoin("sale.createdBy", "createdBy")
+      .select("createdBy.id", "advisorId")
+      .addSelect("createdBy.name", "advisorName")
+      .addSelect("COUNT(sale.id)", "count")
+      .addSelect("COALESCE(SUM(sale.requested_amount), 0)", "total")
+      .groupBy("createdBy.id")
+      .addGroupBy("createdBy.name")
+      .orderBy("count", "DESC")
+      .getRawMany();
+
+    return result.map((row) => ({
+      advisorId: Number(row.advisorId),
+      advisorName: String(row.advisorName),
+      count: Number(row.count),
+      total: Number(row.total),
+    }));
+  }
+
+  async statsByProduct(): Promise<{ product: ProductType; count: number; total: number }[]> {
+    const result = await this.saleRepository
+      .createQueryBuilder("sale")
+      .select("sale.product", "product")
+      .addSelect("COUNT(sale.id)", "count")
+      .addSelect("COALESCE(SUM(sale.requested_amount), 0)", "total")
+      .groupBy("sale.product")
+      .orderBy("total", "DESC")
+      .getRawMany();
+
+    return result.map((row) => ({
+      product: row.product as ProductType,
+      count: Number(row.count),
+      total: Number(row.total),
+    }));
+  }
+
+  async statsByDate(): Promise<{ date: string; count: number; total: number }[]> {
+    const result = await this.saleRepository
+      .createQueryBuilder("sale")
+      .select("DATE(sale.created_at)", "date")
+      .addSelect("COUNT(sale.id)", "count")
+      .addSelect("COALESCE(SUM(sale.requested_amount), 0)", "total")
+      .groupBy("DATE(sale.created_at)")
+      .orderBy("date", "ASC")
+      .getRawMany();
+
+    return result.map((row) => ({
+      date: String(row.date),
+      count: Number(row.count),
+      total: Number(row.total),
+    }));
   }
 }

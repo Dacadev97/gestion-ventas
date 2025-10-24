@@ -12,6 +12,7 @@ import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useEffect } from "react";
+import { NumericFormat } from "react-number-format";
 
 import { FranchiseType, ProductType } from "../../types";
 
@@ -171,20 +172,21 @@ export function SaleFormDialog({ open, initialValues, onClose, onSubmit }: SaleF
               name="requestedAmount"
               control={control}
               render={({ field }) => (
-                <TextField
-                  {...field}
+                <NumericFormat
                   value={field.value ?? ""}
-                  onChange={(event) => {
-                    const { value } = event.target;
-                    const numericValue = value === "" ? 0 : Number(value);
-                    field.onChange(Number.isNaN(numericValue) ? 0 : numericValue);
+                  onValueChange={(values: { floatValue?: number }) => {
+                    field.onChange(values.floatValue ?? 0);
                   }}
+                  customInput={TextField}
                   label="Cupo solicitado"
-                  type="number"
                   fullWidth
                   error={Boolean(errors.requestedAmount)}
                   helperText={errors.requestedAmount?.message}
-                  inputProps={{ min: 0 }}
+                  thousandSeparator="."
+                  decimalSeparator=","
+                  prefix="$"
+                  allowNegative={false}
+                  decimalScale={0}
                 />
               )}
             />

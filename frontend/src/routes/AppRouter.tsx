@@ -5,6 +5,7 @@ import { LoginPage } from "../pages/LoginPage.tsx";
 import { RequireAuth } from "./RequireAuth.tsx";
 import { SalesPage } from "../pages/SalesPage.tsx";
 import { UsersPage } from "../pages/UsersPage.tsx";
+import { StatsPage } from "../pages/StatsPage.tsx";
 import { ProtectedRoute } from "../components/ProtectedRoute.tsx";
 import { RoleName } from "../types/index.ts";
 
@@ -17,6 +18,7 @@ export function AppRouter() {
         <Route element={<DashboardLayout />}>
           <Route index element={<Navigate to="/sales" replace />} />
           <Route path="sales" element={<SalesPage />} />
+          <Route path="stats" element={<StatsPage />} />
           <Route element={<ProtectedRoute allowedRoles={[RoleName.ADMIN]} redirectTo="/" />}> 
             <Route path="users" element={<UsersPage />} />
           </Route>

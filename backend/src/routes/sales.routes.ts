@@ -17,6 +17,7 @@ const controller = new SaleController();
 router.use(authenticate, authorize(RoleName.ADMIN, RoleName.ADVISOR));
 
 router.get("/", saleFiltersValidator, validateRequest, asyncHandler(controller.list));
+router.get("/stats", asyncHandler(controller.stats));
 router.get("/:id", asyncHandler(controller.getById));
 router.post("/", createSaleValidator, validateRequest, asyncHandler(controller.create));
 router.put("/:id", updateSaleValidator, validateRequest, asyncHandler(controller.update));
