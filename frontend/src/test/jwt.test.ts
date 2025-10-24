@@ -3,6 +3,7 @@ import { decodeJwt, getRoleFromToken, isTokenExpired } from '../utils/jwt';
 import { RoleName } from '../types';
 
 // Helper para crear un token JWT de prueba
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const createMockToken = (payload: any): string => {
   const header = { alg: 'HS256', typ: 'JWT' };
   const encodedHeader = btoa(JSON.stringify(header));
