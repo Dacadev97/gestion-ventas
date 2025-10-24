@@ -1,16 +1,20 @@
 import {
-  Box,
   IconButton,
   Table,
   TableBody,
   TableCell,
+  TableContainer,
   TableHead,
   TableRow,
   Typography,
+  Chip,
+  Tooltip,
+  Stack,
 } from "@mui/material";
 import { Delete, Edit } from "@mui/icons-material";
 import type { User } from "../../types";
 import { formatDateTime } from "../../utils/format";
+import { RoleName } from "../../types";
 
 interface UsersTableProps {
   users: User[];
@@ -18,53 +22,93 @@ interface UsersTableProps {
   onDelete: (user: User) => void;
 }
 
+const getRoleColor = (role: string): "default" | "primary" | "secondary" | "error" | "info" | "success" | "warning" => {
+  switch (role) {
+    case RoleName.ADMIN:
+      return "error";
+    case RoleName.ADVISOR:
+      return "primary";
+    case RoleName.VIEWER:
+      return "info";
+    default:
+      return "default";
+  }
+};
+
 export function UsersTable({ users, onEdit, onDelete }: UsersTableProps) {
   return (
-    <Table>
-      <TableHead>
-        <TableRow>
-          <TableCell>Nombre</TableCell>
-          <TableCell>Correo electrónico</TableCell>
-          <TableCell>Rol</TableCell>
-          <TableCell>Creado</TableCell>
-          <TableCell>Actualizado</TableCell>
-          <TableCell align="right">Acciones</TableCell>
-        </TableRow>
-      </TableHead>
-      <TableBody>
-        {users.map((user) => (
-          <TableRow key={user.id} hover>
-            <TableCell>{user.name}</TableCell>
-            <TableCell>{user.email}</TableCell>
-            <TableCell>
-              {typeof user.role === "string"
-                ? user.role
-                : typeof user.role === "object" && user.role !== null
-                  ? user.role.name ?? "-"
-                  : "-"}
-            </TableCell>
-            <TableCell>{formatDateTime(user.createdAt)}</TableCell>
-            <TableCell>{formatDateTime(user.updatedAt)}</TableCell>
-            <TableCell align="right">
-              <IconButton color="primary" onClick={() => onEdit(user)}>
-                <Edit />
-              </IconButton>
-              <IconButton color="error" onClick={() => onDelete(user)}>
-                <Delete />
-              </IconButton>
-            </TableCell>
-          </TableRow>
-        ))}
-        {users.length === 0 && (
+    <TableContainer>
+      <Table>
+        <TableHead>
           <TableRow>
-            <TableCell colSpan={6}>
-              <Box py={3} display="flex" justifyContent="center">
-                <Typography>No hay usuarios registrados.</Typography>
-              </Box>
-            </TableCell>
+            <TableCell>Nombre</TableCell>
+            <TableCell>Correo electrónico</TableCell>
+            <TableCell>Rol</TableCell>
+            <TableCell>Creado</TableCell>
+            <TableCell>Actualizado</TableCell>
+            <TableCell align="center">Acciones</TableCell>
           </TableRow>
-        )}
-      </TableBody>
-    </Table>
+        </TableHead>
+        <TableBody>
+          {users.map((user) => {
+            const roleText = typeof user.role === "string"
+              ? user.role
+              : typeof user.role === "object" && user.role !== null
+                ? user.role.name ?? "-"
+                : "-";
+            
+            return (
+              <TableRow 
+                key={user.id} 
+                hover
+                sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+              >
+                <TableCell>
+                  <Typography variant="body2" fontWeight={500}>
+                    {user.name}
+                  </Typography>
+                </TableCell>
+                <TableCell>
+                  <Typography variant="body2" color="text.secondary">
+                    {user.email}
+                  </Typography>
+                </TableCell>
+                <TableCell>
+                  <Chip 
+                    label={roleText} 
+                    size="small" 
+                    color={getRoleColor(roleText)}
+                  />
+                </TableCell>
+                <TableCell>
+                  <Typography variant="body2" color="text.secondary">
+                    {formatDateTime(user.createdAt)}
+                  </Typography>
+                </TableCell>
+                <TableCell>
+                  <Typography variant="body2" color="text.secondary">
+                    {formatDateTime(user.updatedAt)}
+                  </Typography>
+                </TableCell>
+                <TableCell align="center">
+                  <Stack direction="row" spacing={0.5} justifyContent="center">
+                    <Tooltip title="Editar">
+                      <IconButton size="small" color="primary" onClick={() => onEdit(user)}>
+                        <Edit fontSize="small" />
+                      </IconButton>
+                    </Tooltip>
+                    <Tooltip title="Eliminar">
+                      <IconButton size="small" color="error" onClick={() => onDelete(user)}>
+                        <Delete fontSize="small" />
+                      </IconButton>
+                    </Tooltip>
+                  </Stack>
+                </TableCell>
+              </TableRow>
+            );
+          })}
+        </TableBody>
+      </Table>
+    </TableContainer>
   );
 }

@@ -5,8 +5,11 @@ import {
   CardContent,
   CircularProgress,
   Typography,
+  Stack,
+  Alert,
+  AlertTitle,
 } from "@mui/material";
-import { Add } from "@mui/icons-material";
+import { Add, People } from "@mui/icons-material";
 import { useEffect, useState } from "react";
 
 import { useAppDispatch, useAppSelector } from "../hooks/index.ts";
@@ -49,11 +52,11 @@ export function UsersPage() {
 
   if (!canManageUsers) {
     return (
-      <Box>
-        <Typography variant="h5" gutterBottom>
-          Acceso restringido
-        </Typography>
-        <Typography>Solo los administradores pueden gestionar los usuarios.</Typography>
+      <Box sx={{ maxWidth: 600, mx: "auto", mt: 4 }}>
+        <Alert severity="warning">
+          <AlertTitle>Acceso restringido</AlertTitle>
+          Solo los administradores pueden gestionar los usuarios.
+        </Alert>
       </Box>
     );
   }
@@ -135,23 +138,49 @@ export function UsersPage() {
   };
 
   return (
-    <Box>
-      <Typography variant="h4" gutterBottom>
-        Gestión de usuarios
-      </Typography>
+    <Box sx={{ width: "100%" }}>
+      <Stack direction="row" justifyContent="space-between" alignItems="center" mb={3}>
+        <Stack direction="row" spacing={2} alignItems="center">
+          <People fontSize="large" color="primary" />
+          <Typography variant="h4" fontWeight={700}>
+            Gestión de Usuarios
+          </Typography>
+        </Stack>
+        <Button 
+          variant="contained" 
+          size="large"
+          startIcon={<Add />} 
+          onClick={handleCreate} 
+          disabled={status === "loading"}
+          sx={{ minWidth: 180 }}
+        >
+          Crear usuario
+        </Button>
+      </Stack>
 
-      <Card>
-        <CardContent>
-          <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
-            <Typography variant="h6">Usuarios registrados</Typography>
-            <Button variant="contained" startIcon={<Add />} onClick={handleCreate} disabled={status === "loading"}>
-              Crear usuario
-            </Button>
+      <Card sx={{ width: "100%" }}>
+        <CardContent sx={{ p: 0 }}>
+          <Box sx={{ p: 3, pb: 2 }}>
+            <Typography variant="h6" fontWeight={600}>
+              Usuarios registrados
+            </Typography>
           </Box>
 
           {status === "loading" ? (
-            <Box display="flex" justifyContent="center" py={4}>
+            <Box display="flex" justifyContent="center" py={8}>
               <CircularProgress />
+            </Box>
+          ) : items.length === 0 ? (
+            <Box display="flex" flexDirection="column" alignItems="center" py={8}>
+              <Typography variant="h6" color="text.secondary" gutterBottom>
+                No hay usuarios registrados
+              </Typography>
+              <Typography variant="body2" color="text.secondary" mb={2}>
+                Crea el primer usuario para comenzar
+              </Typography>
+              <Button variant="contained" startIcon={<Add />} onClick={handleCreate}>
+                Crear usuario
+              </Button>
             </Box>
           ) : (
             <UsersTable users={items} onEdit={handleEdit} onDelete={handleDelete} />

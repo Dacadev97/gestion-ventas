@@ -10,8 +10,18 @@ import {
   TextField,
   Typography,
   Chip,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Tooltip,
+  Stack,
+  TablePagination,
 } from "@mui/material";
-import { Add, Delete, Edit, MoreVert, Refresh, Visibility } from "@mui/icons-material";
+import { Add, Delete, Edit, MoreVert, Refresh, Visibility, FilterList } from "@mui/icons-material";
 import { useEffect, useMemo, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 
@@ -52,6 +62,8 @@ export function SalesPage() {
   const [detailSale, setDetailSale] = useState<Sale | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [statusMenuAnchorEl, setStatusMenuAnchorEl] = useState<null | HTMLElement>(null);
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
   const [filters, setFilters] = useState<SalesFilters>({
     product: "",
     createdFrom: "",
@@ -119,6 +131,16 @@ export function SalesPage() {
   const resetFilters = () => {
     reset({ product: "", createdFrom: "", createdTo: "" });
     setFilters({ product: "", createdFrom: "", createdTo: "" });
+    setPage(0);
+  };
+
+  const handleChangePage = (_event: unknown, newPage: number) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
   };
 
   const handleCreateSale = () => {
@@ -186,6 +208,13 @@ export function SalesPage() {
   };
 
   const filteredSales = useMemo(() => list, [list]);
+  
+  // Aplicar paginación
+  const paginatedSales = useMemo(() => {
+    const startIndex = page * rowsPerPage;
+    const endIndex = startIndex + rowsPerPage;
+    return filteredSales.slice(startIndex, endIndex);
+  }, [filteredSales, page, rowsPerPage]);
 
   const tokenRole = getRoleFromToken(token);
   const canManageSales = tokenRole === RoleName.ADMIN || tokenRole === RoleName.ADVISOR;
@@ -198,15 +227,31 @@ export function SalesPage() {
 
   return (
     <Box sx={{ width: "100%" }}>
-      <Typography variant="h4" gutterBottom>
-        Ventas registradas
-      </Typography>
+      <Stack direction="row" justifyContent="space-between" alignItems="center" mb={3}>
+        <Typography variant="h4" fontWeight={700}>
+          Gestión de Ventas
+        </Typography>
+        {canManageSales && (
+          <Button 
+            variant="contained" 
+            size="large"
+            startIcon={<Add />} 
+            onClick={handleCreateSale}
+            sx={{ minWidth: 180 }}
+          >
+            Radicar venta
+          </Button>
+        )}
+      </Stack>
 
       <Card sx={{ mb: 3, width: "100%" }}>
         <CardContent>
-          <Typography variant="h6" gutterBottom>
-            Filtros
-          </Typography>
+          <Stack direction="row" alignItems="center" spacing={1} mb={2}>
+            <FilterList color="primary" />
+            <Typography variant="h6" fontWeight={600}>
+              Filtros
+            </Typography>
+          </Stack>
           <Box component="form" onSubmit={handleSubmit(onSubmitFilters)}>
             <Box
               sx={{
@@ -279,110 +324,134 @@ export function SalesPage() {
       </Card>
 
       <Card sx={{ width: "100%" }}>
-        <CardContent>
-          <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-            <Typography variant="h6">Listado de ventas</Typography>
-            <Box display="flex" gap={2} alignItems="center">
-              <Typography variant="subtitle1">
-                Total cupo solicitado: <strong>{formatCurrency(totalRequestedAmount)}</strong>
+        <CardContent sx={{ p: 0 }}>
+          <Box sx={{ p: 3, pb: 2 }}>
+            <Stack direction="row" justifyContent="space-between" alignItems="center">
+              <Typography variant="h6" fontWeight={600}>
+                Listado de ventas
               </Typography>
-              {canManageSales && (
-                <Button variant="contained" startIcon={<Add />} onClick={handleCreateSale}>
-                  Radicar venta
-                </Button>
-              )}
-            </Box>
+              <Chip 
+                label={`Total: ${formatCurrency(totalRequestedAmount)}`}
+                color="primary"
+                sx={{ fontWeight: 600, fontSize: '0.95rem', px: 1 }}
+              />
+            </Stack>
           </Box>
 
           {status === "loading" ? (
-            <Box display="flex" justifyContent="center" py={4}>
+            <Box display="flex" justifyContent="center" py={8}>
               <CircularProgress />
             </Box>
+          ) : filteredSales.length === 0 ? (
+            <Box display="flex" flexDirection="column" alignItems="center" py={8}>
+              <Typography variant="h6" color="text.secondary" gutterBottom>
+                No se encontraron ventas
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Intenta ajustar los filtros o crear una nueva venta
+              </Typography>
+            </Box>
           ) : (
-            <Box sx={{ width: "100%", overflowX: "auto" }}>
-              <Box component="table" width="100%" sx={{ borderCollapse: "collapse", minWidth: 800 }}>
-                <Box component="thead">
-                  <Box component="tr">
-                    <Box component="th" textAlign="left" sx={{ borderBottom: "1px solid #e0e0e0", pb: 1 }}>
-                      Producto
-                    </Box>
-                    <Box component="th" textAlign="left" sx={{ borderBottom: "1px solid #e0e0e0", pb: 1 }}>
-                      Cupo solicitado
-                    </Box>
-                    <Box component="th" textAlign="left" sx={{ borderBottom: "1px solid #e0e0e0", pb: 1 }}>
-                      Franquicia / Tasa
-                    </Box>
-                    <Box component="th" textAlign="left" sx={{ borderBottom: "1px solid #e0e0e0", pb: 1 }}>
-                      Fecha creación
-                    </Box>
-                    <Box component="th" textAlign="left" sx={{ borderBottom: "1px solid #e0e0e0", pb: 1 }}>
-                      Creado por
-                    </Box>
-                    <Box component="th" textAlign="left" sx={{ borderBottom: "1px solid #e0e0e0", pb: 1 }}>
-                      Estado
-                    </Box>
-                    <Box component="th" textAlign="left" sx={{ borderBottom: "1px solid #e0e0e0", pb: 1 }}>
-                      Acciones
-                    </Box>
-                  </Box>
-                </Box>
-                <Box component="tbody">
-                  {filteredSales.map((sale) => (
-                    <Box component="tr" key={sale.id}>
-                      <Box component="td" sx={{ borderBottom: "1px solid #f0f0f0", py: 1 }}>
-                        {sale.product}
-                      </Box>
-                      <Box component="td" sx={{ borderBottom: "1px solid #f0f0f0", py: 1 }}>
-                        {formatCurrency(sale.requestedAmount)}
-                      </Box>
-                      <Box component="td" sx={{ borderBottom: "1px solid #f0f0f0", py: 1 }}>
+            <>
+              <TableContainer>
+                <Table>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>Producto</TableCell>
+                      <TableCell align="right">Cupo solicitado</TableCell>
+                      <TableCell>Franquicia / Tasa</TableCell>
+                      <TableCell>Fecha creación</TableCell>
+                      <TableCell>Creado por</TableCell>
+                      <TableCell>Estado</TableCell>
+                      <TableCell align="center">Acciones</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {paginatedSales.map((sale) => (
+                    <TableRow 
+                      key={sale.id}
+                      hover
+                      sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                    >
+                      <TableCell>
+                        <Typography variant="body2" fontWeight={500}>
+                          {sale.product}
+                        </Typography>
+                      </TableCell>
+                      <TableCell align="right">
+                        <Typography variant="body2" fontWeight={600}>
+                          {formatCurrency(sale.requestedAmount)}
+                        </Typography>
+                      </TableCell>
+                      <TableCell>
                         {sale.product === ProductType.CREDIT_CARD
                           ? sale.franchise ?? "-"
                           : sale.rate !== null && sale.rate !== undefined
                             ? `${sale.rate.toFixed(2)}%`
                             : "-"}
-                      </Box>
-                      <Box component="td" sx={{ borderBottom: "1px solid #f0f0f0", py: 1 }}>
-                        {formatDateTime(sale.createdAt)}
-                      </Box>
-                      <Box component="td" sx={{ borderBottom: "1px solid #f0f0f0", py: 1 }}>
-                        {sale.createdBy.name}
-                      </Box>
-                      <Box component="td" sx={{ borderBottom: "1px solid #f0f0f0", py: 1 }}>
-                        <Chip label={sale.status} size="small" color={statusColorMap[sale.status]} />
-                      </Box>
-                      <Box component="td" sx={{ borderBottom: "1px solid #f0f0f0", py: 1 }}>
-                        <Box display="flex" gap={0.5}>
-                          <IconButton size="small" color="primary" onClick={() => handleViewSale(sale)}>
-                            <Visibility />
-                          </IconButton>
+                      </TableCell>
+                      <TableCell>
+                        <Typography variant="body2" color="text.secondary">
+                          {formatDateTime(sale.createdAt)}
+                        </Typography>
+                      </TableCell>
+                      <TableCell>{sale.createdBy.name}</TableCell>
+                      <TableCell>
+                        <Chip 
+                          label={sale.status} 
+                          size="small" 
+                          color={statusColorMap[sale.status]}
+                        />
+                      </TableCell>
+                      <TableCell align="center">
+                        <Stack direction="row" spacing={0.5} justifyContent="center">
+                          <Tooltip title="Ver detalle">
+                            <IconButton size="small" color="primary" onClick={() => handleViewSale(sale)}>
+                              <Visibility fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
                           {canManageSales && (
                             <>
-                              <IconButton size="small" color="primary" onClick={() => handleEditSale(sale)}>
-                                <Edit />
-                              </IconButton>
-                              <IconButton size="small" color="error" onClick={() => handleDeleteSale(sale)}>
-                                <Delete />
-                              </IconButton>
-                              <IconButton size="small" onClick={(e) => handleOpenStatusMenu(e, sale)}>
-                                <MoreVert />
-                              </IconButton>
+                              <Tooltip title="Editar">
+                                <IconButton size="small" color="primary" onClick={() => handleEditSale(sale)}>
+                                  <Edit fontSize="small" />
+                                </IconButton>
+                              </Tooltip>
+                              <Tooltip title="Eliminar">
+                                <IconButton size="small" color="error" onClick={() => handleDeleteSale(sale)}>
+                                  <Delete fontSize="small" />
+                                </IconButton>
+                              </Tooltip>
+                              <Tooltip title="Cambiar estado">
+                                <IconButton size="small" onClick={(e) => handleOpenStatusMenu(e, sale)}>
+                                  <MoreVert fontSize="small" />
+                                </IconButton>
+                              </Tooltip>
                             </>
                           )}
-                        </Box>
-                      </Box>
-                    </Box>
+                        </Stack>
+                      </TableCell>
+                    </TableRow>
                   ))}
-                  {filteredSales.length === 0 && (
-                    <Box component="tr">
-                      <Box component="td" colSpan={7} textAlign="center" sx={{ py: 3 }}>
-                        No se encontraron ventas registradas.
-                      </Box>
-                    </Box>
-                  )}
-                </Box>
-              </Box>
-            </Box>
+                </TableBody>
+              </Table>
+            </TableContainer>
+            <TablePagination
+              component="div"
+              count={filteredSales.length}
+              page={page}
+              onPageChange={handleChangePage}
+              rowsPerPage={rowsPerPage}
+              onRowsPerPageChange={handleChangeRowsPerPage}
+              rowsPerPageOptions={[5, 10, 25, 50]}
+              labelRowsPerPage="Filas por página:"
+              labelDisplayedRows={({ from, to, count }) => `${from}-${to} de ${count}`}
+              sx={{
+                borderTop: '1px solid',
+                borderColor: 'divider',
+              }}
+            />
+          </>
           )}
         </CardContent>
       </Card>
