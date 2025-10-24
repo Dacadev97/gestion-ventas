@@ -34,6 +34,9 @@ export function DashboardLayout() {
   const { user, token } = useAppSelector((state) => state.auth);
   const tokenRole = getRoleFromToken(token);
 
+  // Calculate drawer width before any early returns
+  const desktopDrawerWidth = useMemo(() => (collapsed ? collapsedWidth : drawerWidth), [collapsed]);
+
   useEffect(() => {
     // Redirect to login if there's no user (session expired or not logged in)
     if (!user) {
@@ -120,8 +123,6 @@ export function DashboardLayout() {
       </List>
     </Box>
   );
-
-  const desktopDrawerWidth = useMemo(() => (collapsed ? collapsedWidth : drawerWidth), [collapsed]);
 
   return (
     <Box sx={{ display: "flex" }}>
