@@ -95,53 +95,63 @@ export function LoginPage() {
     <Box
       sx={{
         minHeight: "100vh",
+        width: "100vw",
         backgroundColor: "background.default",
         display: "flex",
-        flexDirection: { xs: "column", md: "row" },
-        alignItems: "stretch",
-        width: "100%",
-        maxWidth: { xs: "100%", lg: 1200 },
-        mx: "auto",
+        alignItems: "center",
+        justifyContent: "center",
+        position: "relative",
       }}
     >
       <Box
         sx={{
-          flex: { xs: "0 0 auto", md: "0 0 45%" },
-          display: { xs: "none", md: "flex" },
-          flexDirection: "column",
-          justifyContent: "center",
-          color: "common.white",
-          px: 8,
-          background: "linear-gradient(135deg, #004481 0%, #0074c1 100%)",
-        }}
-      >
-        <Typography variant="h3" fontWeight={600}>
-          Banco Konecta
-        </Typography>
-        <Typography variant="h5" sx={{ mt: 2, maxWidth: 360, fontWeight: 300 }}>
-          Portal de ventas para asesores y administradores.
-        </Typography>
-      </Box>
-
-      <Box
-        sx={{
-          flex: { xs: "1 1 auto", md: "1 1 55%" },
           display: "flex",
-          alignItems: "center",
-          justifyContent: { xs: "center", md: "flex-end" },
-          py: { xs: 6, sm: 8 },
-          px: { xs: 3, sm: 6, md: 8 },
-          pr: { md: 14 },
-          backgroundColor: { xs: "background.default", md: "background.paper" },
-          minHeight: { xs: "auto", md: "100vh" },
+          flexDirection: { xs: "column", md: "row" },
+          width: { xs: "calc(100% - 32px)", md: 1100 },
+          maxWidth: { xs: "calc(100% - 32px)", md: 1100 },
+          minHeight: { md: 550 },
+          borderRadius: { md: 3 },
+          overflow: "hidden",
+          boxShadow: { md: "0 20px 60px rgba(0,0,0,0.3)" },
         }}
       >
-        <Card elevation={8} sx={{ width: "100%", maxWidth: 420 }}>
-          <CardContent sx={{ p: { xs: 4, sm: 5 } }}>
-            <Typography variant="h5" gutterBottom align="center">
+        <Box
+          sx={{
+            flex: { xs: "0 0 auto", md: "0 0 440px" },
+            display: { xs: "none", md: "flex" },
+            flexDirection: "column",
+            justifyContent: "center",
+            color: "common.white",
+            px: 6,
+            py: 8,
+            background: "linear-gradient(135deg, #004481 0%, #0074c1 100%)",
+          }}
+        >
+          <Typography variant="h3" fontWeight={600}>
+            Banco Konecta
+          </Typography>
+          <Typography variant="h5" sx={{ mt: 2, maxWidth: 360, fontWeight: 300 }}>
+            Portal de ventas para asesores y administradores.
+          </Typography>
+        </Box>
+
+        <Box
+          sx={{
+            flex: { xs: "1 1 auto", md: "0 0 660px" },
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            py: { xs: 6, sm: 8 },
+            px: { xs: 3, sm: 4 },
+            backgroundColor: "background.paper",
+          }}
+        >
+          <Card elevation={8} sx={{ width: "100%", maxWidth: 460, mx: "auto" }}>
+            <CardContent sx={{ p: { xs: 4, sm: 5 } }}>
+            <Typography variant="h5" gutterBottom align="center" fontWeight={600}>
               Portal de Ventas - Banco Konecta
             </Typography>
-            <Typography variant="body2" align="center" color="text.secondary">
+            <Typography variant="body2" align="center" color="text.secondary" sx={{ mb: 3 }}>
               Inicia sesión con tus credenciales para continuar.
             </Typography>
 
@@ -149,7 +159,7 @@ export function LoginPage() {
               component="form"
               onSubmit={handleSubmit(onSubmit)}
               sx={{
-                mt: 4,
+                mt: 3,
                 display: "flex",
                 flexDirection: "column",
                 gap: 2.5,
@@ -288,6 +298,7 @@ export function LoginPage() {
             </Box>
           </CardContent>
         </Card>
+      </Box>
       </Box>
     </Box>
   );
