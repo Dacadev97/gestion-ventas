@@ -27,7 +27,7 @@ const createMockStore = (initialState: any) => {
       users: usersReducer,
       ui: uiReducer,
       captcha: captchaReducer,
-    },
+    } as any,
     preloadedState: initialState,
   });
 };
