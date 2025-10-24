@@ -19,6 +19,7 @@ vi.mock('../utils/jwt', () => ({
 import { isTokenExpired } from '../utils/jwt';
 import { RequireAuth } from '../routes/RequireAuth';
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const createMockStore = (initialState: any) => {
   return configureStore({
     reducer: {
@@ -27,6 +28,7 @@ const createMockStore = (initialState: any) => {
       users: usersReducer,
       ui: uiReducer,
       captcha: captchaReducer,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any,
     preloadedState: initialState,
   });
