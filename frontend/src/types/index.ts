@@ -15,6 +15,12 @@ export enum FranchiseType {
   MASTERCARD = "MASTERCARD",
 }
 
+export enum SaleStatus {
+  OPEN = "Abierto",
+  IN_PROGRESS = "En Proceso",
+  CLOSED = "Finalizado",
+}
+
 export interface User {
   id: number;
   name: string;
@@ -45,6 +51,7 @@ export interface Captcha {
 export interface Sale {
   id: number;
   product: ProductType;
+  status: SaleStatus;
   requestedAmount: number;
   franchise?: FranchiseType | null;
   rate?: number | null;

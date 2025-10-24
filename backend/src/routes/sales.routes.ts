@@ -20,6 +20,7 @@ router.get("/", saleFiltersValidator, validateRequest, asyncHandler(controller.l
 router.get("/:id", asyncHandler(controller.getById));
 router.post("/", createSaleValidator, validateRequest, asyncHandler(controller.create));
 router.put("/:id", updateSaleValidator, validateRequest, asyncHandler(controller.update));
+router.patch("/:id/status", asyncHandler(controller.updateStatus));
 router.delete("/:id", asyncHandler(controller.delete));
 
 export { router as saleRouter };

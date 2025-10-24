@@ -15,6 +15,12 @@ export enum FranchiseType {
   MASTERCARD = "MASTERCARD",
 }
 
+export enum SaleStatus {
+  OPEN = "Abierto",
+  IN_PROGRESS = "En Proceso",
+  CLOSED = "Finalizado",
+}
+
 @Entity({ name: "sales" })
 export class Sale {
   @PrimaryGeneratedColumn()
@@ -22,6 +28,9 @@ export class Sale {
 
   @Column({ type: "enum", enum: ProductType })
   product!: ProductType;
+
+  @Column({ type: "enum", enum: SaleStatus, default: SaleStatus.OPEN })
+  status!: SaleStatus;
 
   @Column({ name: "requested_amount", type: "numeric", precision: 15, scale: 2, transformer: decimalTransformer })
   requestedAmount!: number;

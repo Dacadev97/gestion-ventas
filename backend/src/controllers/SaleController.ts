@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 
 import { AppError } from "../errors/AppError";
-import { FranchiseType, ProductType } from "../entities/Sale";
+import { FranchiseType, ProductType, SaleStatus } from "../entities/Sale";
 import { RoleName } from "../entities/Role";
 import { SaleService } from "../services/SaleService";
 import { UserService } from "../services/UserService";
@@ -148,5 +148,27 @@ export class SaleController {
     await this.saleService.delete(id, currentUser);
 
     res.status(204).send();
+  };
+
+  updateStatus = async (req: Request, res: Response) => {
+    const user = req.user;
+
+    if (!user) {
+      throw new AppError("No autorizado", 401);
+    }
+
+    const id = Number(req.params.id);
+
+    if (Number.isNaN(id)) {
+      throw new AppError("Identificador inválido", 400);
+    }
+
+    const currentUser = await this.userService.getById(user.id);
+
+    const { status } = req.body as { status: SaleStatus };
+
+    const sale = await this.saleService.updateStatus(id, status, currentUser);
+
+    res.json(sale);
   };
 }

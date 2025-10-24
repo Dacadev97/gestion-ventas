@@ -81,6 +81,17 @@ export class SaleService {
     await this.saleRepository.remove(sale);
   }
 
+  async updateStatus(id: number, status: SaleStatus, user: User): Promise<Sale> {
+    const sale = await this.getById(id);
+
+    this.ensureCanMutate(sale, user);
+
+    sale.status = status;
+    sale.updatedBy = user;
+
+    return this.saleRepository.save(sale);
+  }
+
   async totalRequested(filters: SaleFilters = {}): Promise<number> {
     const qb = this.applyFilters(
       this.saleRepository.createQueryBuilder("sale").leftJoin("sale.createdBy", "createdBy"),

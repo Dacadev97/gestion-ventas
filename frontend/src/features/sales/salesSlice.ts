@@ -1,13 +1,14 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 
-import { createSale, deleteSale, fetchSaleById, fetchSales, updateSale } from "../../api/sales";
-import type {
-  CreateSalePayload,
-  ProductType,
-  Sale,
-  SalesListResponse,
-  UpdateSalePayload,
-} from "../../types";
+import {
+  createSale,
+  deleteSale,
+  fetchSales,
+  updateSale,
+  updateSaleStatus,
+} from "../../api/sales.ts";
+import type { CreateSalePayload, Sale, SaleStatus, UpdateSalePayload } from "../../types";
+import type { RootState } from "../../store";
 
 type SalesStatus = "idle" | "loading" | "succeeded" | "failed";
 
@@ -87,39 +88,51 @@ export const updateSaleThunk = createAsyncThunk<Sale, { id: number; data: Update
   },
 );
 
-export const deleteSaleThunk = createAsyncThunk<number, number>(
+export const deleteSaleThunk = createAsyncThunk<number, number, { rejectValue: string }>(
   "sales/delete",
   async (id, { rejectWithValue }) => {
     try {
       await deleteSale(id);
+
       return id;
-    } catch (error: unknown) {
+    } catch (error) {
       if (error instanceof Error) {
         return rejectWithValue(error.message);
       }
 
-      return rejectWithValue("No fue posible eliminar la venta");
+      return rejectWithValue("Ocurrió un error inesperado");
     }
   },
 );
+
+export const updateSaleStatusThunk = createAsyncThunk<
+  Sale,
+  { id: number; status: SaleStatus },
+  { rejectValue: string }
+>("sales/updateStatus", async ({ id, status }, { rejectWithValue }) => {
+  try {
+    const updatedSale = await updateSaleStatus(id, status);
+
+    return updatedSale;
+  } catch (error) {
+    if (error instanceof Error) {
+      return rejectWithValue(error.message);
+    }
+
+    return rejectWithValue("Ocurrió un error inesperado");
+  }
+});
 
 const salesSlice = createSlice({
   name: "sales",
   initialState,
   reducers: {
-    clearSalesState(state) {
-      state.list = [];
-      state.totalRequestedAmount = 0;
-      state.selectedSale = null;
-      state.status = "idle";
-      state.error = null;
-    },
+    clearSalesState: () => initialState,
   },
   extraReducers: (builder) => {
     builder
       .addCase(fetchSalesThunk.pending, (state) => {
         state.status = "loading";
-        state.error = null;
       })
       .addCase(fetchSalesThunk.fulfilled, (state, action) => {
         state.status = "succeeded";
@@ -128,10 +141,7 @@ const salesSlice = createSlice({
       })
       .addCase(fetchSalesThunk.rejected, (state, action) => {
         state.status = "failed";
-        state.error = (action.payload as string) ?? "No fue posible obtener las ventas";
-      })
-      .addCase(fetchSaleByIdThunk.fulfilled, (state, action) => {
-        state.selectedSale = action.payload;
+        state.error = action.payload ?? "Ocurrió un error inesperado";
       })
       .addCase(createSaleThunk.fulfilled, (state, action) => {
         state.list.unshift(action.payload);
@@ -139,21 +149,26 @@ const salesSlice = createSlice({
       })
       .addCase(updateSaleThunk.fulfilled, (state, action) => {
         const index = state.list.findIndex((sale) => sale.id === action.payload.id);
-
-        if (index >= 0) {
-          const previousAmount = state.list[index].requestedAmount;
+        if (index !== -1) {
+          const originalSale = state.list[index];
+          state.totalRequestedAmount -= originalSale.requestedAmount;
+          state.totalRequestedAmount += action.payload.requestedAmount;
           state.list[index] = action.payload;
-          state.totalRequestedAmount += action.payload.requestedAmount - previousAmount;
         }
       })
       .addCase(deleteSaleThunk.fulfilled, (state, action) => {
-        const sale = state.list.find((item) => item.id === action.payload);
-
-        if (sale) {
-          state.totalRequestedAmount -= sale.requestedAmount;
+        const index = state.list.findIndex((sale) => sale.id === action.payload);
+        if (index !== -1) {
+          const originalSale = state.list[index];
+          state.totalRequestedAmount -= originalSale.requestedAmount;
+          state.list.splice(index, 1);
         }
-
-        state.list = state.list.filter((item) => item.id !== action.payload);
+      })
+      .addCase(updateSaleStatusThunk.fulfilled, (state, action) => {
+        const index = state.list.findIndex((sale) => sale.id === action.payload.id);
+        if (index !== -1) {
+          state.list[index] = action.payload;
+        }
       });
   },
 });

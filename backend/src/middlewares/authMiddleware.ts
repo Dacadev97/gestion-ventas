@@ -1,4 +1,5 @@
 import { NextFunction, Request, Response } from "express";
+import { JsonWebTokenError, TokenExpiredError } from "jsonwebtoken";
 
 import { AppError } from "../errors/AppError";
 import { RoleName } from "../entities/Role";
@@ -11,16 +12,24 @@ export const authenticate = (req: Request, _res: Response, next: NextFunction) =
     throw new AppError("Token de autenticación requerido", 401);
   }
 
-  const token = header.replace("Bearer ", "");
-  const payload: AuthTokenClaims = verifyAccessToken(token);
+  try {
+    const token = header.replace("Bearer ", "");
+    const payload: AuthTokenClaims = verifyAccessToken(token);
 
-  req.user = {
-    id: payload.sub,
-    email: payload.email,
-    role: payload.role,
-  };
+    req.user = {
+      id: payload.sub,
+      email: payload.email,
+      role: payload.role,
+    };
 
-  next();
+    next();
+  } catch (error) {
+    if (error instanceof TokenExpiredError || error instanceof JsonWebTokenError) {
+      throw new AppError("Token inválido o expirado", 401);
+    }
+
+    throw error;
+  }
 };
 
 export const authorize = (...roles: RoleName[]) =>

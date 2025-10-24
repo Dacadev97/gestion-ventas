@@ -56,11 +56,6 @@ export const loginThunk = createAsyncThunk<AuthResponse, LoginPayload>(
       const response = await login(payload);
 
       dispatch(showSnackbar({ message: "Inicio de sesión exitoso", severity: "success" }));
-      dispatch(fetchSalesThunk(undefined));
-
-      if (response.user.role === RoleName.ADMIN) {
-        dispatch(fetchUsersThunk());
-      }
 
       return response;
     } catch (error: unknown) {

@@ -1,10 +1,11 @@
-import axios, { AxiosError } from "axios";
-import { store } from "../store";
+import axios, { type AxiosError } from "axios";
+import type { EnhancedStore } from "@reduxjs/toolkit";
+
 import { logout } from "../features/auth/authSlice";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:4000/api";
 
-const http = axios.create({
+export const http = axios.create({
   baseURL: API_BASE_URL,
   withCredentials: false,
 });
@@ -20,17 +21,18 @@ http.interceptors.request.use((config) => {
   return config;
 });
 
-// Add response interceptor to handle 401 Unauthorized responses
-http.interceptors.response.use(
-  (response) => response,
-  (error: AxiosError) => {
-    if (error.response?.status === 401) {
-      // Clear auth state and redirect to login
-      store.dispatch(logout());
-      window.location.href = '/login';
-    }
-    return Promise.reject(error);
-  }
-);
+export const setupInterceptors = (store: EnhancedStore) => {
+  http.interceptors.response.use(
+    (response) => response,
+    (error: AxiosError) => {
+      if (error.response?.status === 401) {
+        store.dispatch(logout());
+        window.location.href = "/login";
+      }
 
-export { http, API_BASE_URL };
+      return Promise.reject(error);
+    },
+  );
+};
+
+export { API_BASE_URL };

@@ -31,6 +31,12 @@ export const updateSale = async (id: number, payload: UpdateSalePayload): Promis
   return data;
 };
 
-export const deleteSale = async (id: number): Promise<void> => {
+export async function deleteSale(id: number): Promise<void> {
   await http.delete(`/sales/${id}`);
-};
+}
+
+export async function updateSaleStatus(id: number, status: SaleStatus): Promise<Sale> {
+  const { data } = await http.patch<Sale>(`/sales/${id}/status`, { status });
+
+  return data;
+}

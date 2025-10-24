@@ -21,6 +21,9 @@ import { fetchCaptchaThunk } from "../features/captcha/captchaSlice.ts";
 import { loginThunk } from "../features/auth/authSlice.ts";
 import { useAppDispatch, useAppSelector } from "../hooks/index.ts";
 import type { LoginPayload } from "../types/index.ts";
+import { fetchSalesThunk } from "../features/sales/salesSlice.ts";
+import { fetchUsersThunk } from "../features/users/usersSlice.ts";
+import { RoleName } from "../types/index.ts";
 
 const schema = z.object({
   email: z.string().email("Correo electrónico inválido"),
@@ -65,9 +68,13 @@ export function LoginPage() {
 
   useEffect(() => {
     if (user) {
+      dispatch(fetchSalesThunk());
+      if (user.role === RoleName.ADMIN) {
+        dispatch(fetchUsersThunk());
+      }
       navigate("/", { replace: true });
     }
-  }, [user, navigate]);
+  }, [user, navigate, dispatch]);
 
   const onSubmit = (data: LoginPayload) => {
     const payload: LoginPayload = {
@@ -75,14 +82,7 @@ export function LoginPage() {
       captchaValue: data.captchaValue.trim(),
     };
 
-    dispatch(loginThunk(payload)).then((action) => {
-      if (loginThunk.fulfilled.match(action)) {
-        reset();
-        navigate("/", { replace: true });
-      } else {
-        dispatch(fetchCaptchaThunk());
-      }
-    });
+    dispatch(loginThunk(payload));
   };
 
   const handleRefreshCaptcha = () => {

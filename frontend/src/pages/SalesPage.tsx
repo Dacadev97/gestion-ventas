@@ -5,11 +5,12 @@ import {
   CardContent,
   CircularProgress,
   IconButton,
+  Menu,
   MenuItem,
   TextField,
   Typography,
 } from "@mui/material";
-import { Add, Delete, Edit, Refresh, Visibility } from "@mui/icons-material";
+import { Add, Delete, Edit, MoreVert, Refresh, Visibility } from "@mui/icons-material";
 import { useEffect, useMemo, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 
@@ -19,9 +20,10 @@ import {
   createSaleThunk,
   deleteSaleThunk,
   fetchSalesThunk,
+  updateSaleStatusThunk,
   updateSaleThunk,
 } from "../features/sales/salesSlice.ts";
-import { ProductType, RoleName } from "../types";
+import { ProductType, RoleName, SaleStatus } from "../types";
 import type { Sale } from "../types";
 import { SaleFormDialog } from "../components/Sales/SaleFormDialog.tsx";
 import type { SaleFormValues } from "../components/Sales/SaleFormDialog.tsx";
@@ -47,6 +49,32 @@ export function SalesPage() {
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [detailSale, setDetailSale] = useState<Sale | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
+  const [statusMenuAnchorEl, setStatusMenuAnchorEl] = useState<null | HTMLElement>(null);
+
+  const handleOpenStatusMenu = (event: React.MouseEvent<HTMLButtonElement>, sale: Sale) => {
+    setSelectedSale(sale);
+    setStatusMenuAnchorEl(event.currentTarget);
+  };
+
+  const handleCloseStatusMenu = () => {
+    setStatusMenuAnchorEl(null);
+    setSelectedSale(null);
+  };
+
+  const handleStatusChange = (status: SaleStatus) => {
+    if (selectedSale) {
+      dispatch(updateSaleStatusThunk({ id: selectedSale.id, status }))
+        .unwrap()
+        .then(() => {
+          dispatch(showSnackbar({ message: "Estado actualizado correctamente", severity: "success" }));
+        })
+        .catch((error) => {
+          const message = typeof error === "string" ? error : "No fue posible actualizar el estado";
+          dispatch(showSnackbar({ message, severity: "error" }));
+        });
+    }
+    handleCloseStatusMenu();
+  };
 
   const {
     control,
@@ -273,6 +301,9 @@ export function SalesPage() {
                     Creado por
                   </Box>
                   <Box component="th" textAlign="left" sx={{ borderBottom: "1px solid #e0e0e0", pb: 1 }}>
+                    Estado
+                  </Box>
+                  <Box component="th" textAlign="left" sx={{ borderBottom: "1px solid #e0e0e0", pb: 1 }}>
                     Acciones
                   </Box>
                 </Box>
@@ -300,17 +331,23 @@ export function SalesPage() {
                       {sale.createdBy.name}
                     </Box>
                     <Box component="td" sx={{ borderBottom: "1px solid #f0f0f0", py: 1 }}>
-                      <Box display="flex" gap={1}>
-                        <IconButton color="primary" onClick={() => handleViewSale(sale)}>
+                      {sale.status}
+                    </Box>
+                    <Box component="td" sx={{ borderBottom: "1px solid #f0f0f0", py: 1 }}>
+                      <Box display="flex" gap={0.5}>
+                        <IconButton size="small" color="primary" onClick={() => handleViewSale(sale)}>
                           <Visibility />
                         </IconButton>
                         {canManageSales && (
                           <>
-                            <IconButton color="primary" onClick={() => handleEditSale(sale)}>
+                            <IconButton size="small" color="primary" onClick={() => handleEditSale(sale)}>
                               <Edit />
                             </IconButton>
-                            <IconButton color="error" onClick={() => handleDeleteSale(sale)}>
+                            <IconButton size="small" color="error" onClick={() => handleDeleteSale(sale)}>
                               <Delete />
+                            </IconButton>
+                            <IconButton size="small" onClick={(e) => handleOpenStatusMenu(e, sale)}>
+                              <MoreVert />
                             </IconButton>
                           </>
                         )}
@@ -320,7 +357,7 @@ export function SalesPage() {
                 ))}
                 {filteredSales.length === 0 && (
                   <Box component="tr">
-                    <Box component="td" colSpan={6} textAlign="center" sx={{ py: 3 }}>
+                    <Box component="td" colSpan={7} textAlign="center" sx={{ py: 3 }}>
                       No se encontraron ventas registradas.
                     </Box>
                   </Box>
@@ -330,6 +367,18 @@ export function SalesPage() {
           )}
         </CardContent>
       </Card>
+
+      <Menu
+        anchorEl={statusMenuAnchorEl}
+        open={Boolean(statusMenuAnchorEl)}
+        onClose={handleCloseStatusMenu}
+      >
+        {Object.values(SaleStatus).map((status) => (
+          <MenuItem key={status} onClick={() => handleStatusChange(status)}>
+            {status}
+          </MenuItem>
+        ))}
+      </Menu>
 
       <SaleFormDialog
         open={isFormOpen}

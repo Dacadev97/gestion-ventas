@@ -5,6 +5,7 @@ import { captchaReducer } from "../features/captcha/captchaSlice.ts";
 import { salesReducer } from "../features/sales/salesSlice.ts";
 import { usersReducer } from "../features/users/usersSlice.ts";
 import { uiReducer } from "../features/ui/uiSlice.ts";
+import { setupInterceptors } from "../api/http.ts";
 
 export const store = configureStore({
   reducer: {
@@ -15,6 +16,8 @@ export const store = configureStore({
     ui: uiReducer,
   },
 });
+
+setupInterceptors(store);
 
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;
