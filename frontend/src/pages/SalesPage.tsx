@@ -10,7 +10,6 @@ import {
   TextField,
   Typography,
   Chip,
-  Pagination,
 } from "@mui/material";
 import { Add, Delete, Edit, MoreVert, Refresh, Visibility } from "@mui/icons-material";
 import { useEffect, useMemo, useState } from "react";
@@ -45,7 +44,7 @@ export function SalesPage() {
   const dispatch = useAppDispatch();
   const salesState = useAppSelector((state) => state.sales);
   const authState = useAppSelector((state) => state.auth);
-  const { list, totalRequestedAmount, totalCount, currentPage, pageSize, status } = salesState;
+  const { list, totalRequestedAmount, status } = salesState;
   const { token } = authState;
   const [selectedSale, setSelectedSale] = useState<Sale | null>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -101,15 +100,13 @@ export function SalesPage() {
       product: filters.product || undefined,
       createdFrom: filters.createdFrom || undefined,
       createdTo: filters.createdTo || undefined,
-      page: currentPage,
-      limit: pageSize,
     };
     dispatch(fetchSalesThunk(params));
 
     return () => {
       dispatch(clearSalesState());
     };
-  }, [dispatch, currentPage, pageSize, filters]);
+  }, [dispatch, filters]);
 
   const onSubmitFilters = (values: SalesFilters) => {
     setFilters({
@@ -200,12 +197,12 @@ export function SalesPage() {
   };
 
   return (
-    <Box>
+    <Box sx={{ width: "100%" }}>
       <Typography variant="h4" gutterBottom>
         Ventas registradas
       </Typography>
 
-      <Card sx={{ mb: 3 }}>
+      <Card sx={{ mb: 3, width: "100%" }}>
         <CardContent>
           <Typography variant="h6" gutterBottom>
             Filtros
@@ -281,7 +278,7 @@ export function SalesPage() {
         </CardContent>
       </Card>
 
-      <Card>
+      <Card sx={{ width: "100%" }}>
         <CardContent>
           <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
             <Typography variant="h6">Listado de ventas</Typography>
@@ -302,112 +299,93 @@ export function SalesPage() {
               <CircularProgress />
             </Box>
           ) : (
-            <Box component="table" width="100%" sx={{ borderCollapse: "collapse" }}>
-              <Box component="thead">
-                <Box component="tr">
-                  <Box component="th" textAlign="left" sx={{ borderBottom: "1px solid #e0e0e0", pb: 1 }}>
-                    Producto
-                  </Box>
-                  <Box component="th" textAlign="left" sx={{ borderBottom: "1px solid #e0e0e0", pb: 1 }}>
-                    Cupo solicitado
-                  </Box>
-                  <Box component="th" textAlign="left" sx={{ borderBottom: "1px solid #e0e0e0", pb: 1 }}>
-                    Franquicia / Tasa
-                  </Box>
-                  <Box component="th" textAlign="left" sx={{ borderBottom: "1px solid #e0e0e0", pb: 1 }}>
-                    Fecha creación
-                  </Box>
-                  <Box component="th" textAlign="left" sx={{ borderBottom: "1px solid #e0e0e0", pb: 1 }}>
-                    Creado por
-                  </Box>
-                  <Box component="th" textAlign="left" sx={{ borderBottom: "1px solid #e0e0e0", pb: 1 }}>
-                    Estado
-                  </Box>
-                  <Box component="th" textAlign="left" sx={{ borderBottom: "1px solid #e0e0e0", pb: 1 }}>
-                    Acciones
+            <Box sx={{ width: "100%", overflowX: "auto" }}>
+              <Box component="table" width="100%" sx={{ borderCollapse: "collapse", minWidth: 800 }}>
+                <Box component="thead">
+                  <Box component="tr">
+                    <Box component="th" textAlign="left" sx={{ borderBottom: "1px solid #e0e0e0", pb: 1 }}>
+                      Producto
+                    </Box>
+                    <Box component="th" textAlign="left" sx={{ borderBottom: "1px solid #e0e0e0", pb: 1 }}>
+                      Cupo solicitado
+                    </Box>
+                    <Box component="th" textAlign="left" sx={{ borderBottom: "1px solid #e0e0e0", pb: 1 }}>
+                      Franquicia / Tasa
+                    </Box>
+                    <Box component="th" textAlign="left" sx={{ borderBottom: "1px solid #e0e0e0", pb: 1 }}>
+                      Fecha creación
+                    </Box>
+                    <Box component="th" textAlign="left" sx={{ borderBottom: "1px solid #e0e0e0", pb: 1 }}>
+                      Creado por
+                    </Box>
+                    <Box component="th" textAlign="left" sx={{ borderBottom: "1px solid #e0e0e0", pb: 1 }}>
+                      Estado
+                    </Box>
+                    <Box component="th" textAlign="left" sx={{ borderBottom: "1px solid #e0e0e0", pb: 1 }}>
+                      Acciones
+                    </Box>
                   </Box>
                 </Box>
-              </Box>
-              <Box component="tbody">
-                {filteredSales.map((sale) => (
-                  <Box component="tr" key={sale.id}>
-                    <Box component="td" sx={{ borderBottom: "1px solid #f0f0f0", py: 1 }}>
-                      {sale.product}
-                    </Box>
-                    <Box component="td" sx={{ borderBottom: "1px solid #f0f0f0", py: 1 }}>
-                      {formatCurrency(sale.requestedAmount)}
-                    </Box>
-                    <Box component="td" sx={{ borderBottom: "1px solid #f0f0f0", py: 1 }}>
-                      {sale.product === ProductType.CREDIT_CARD
-                        ? sale.franchise ?? "-"
-                        : sale.rate !== null && sale.rate !== undefined
-                          ? `${sale.rate.toFixed(2)}%`
-                          : "-"}
-                    </Box>
-                    <Box component="td" sx={{ borderBottom: "1px solid #f0f0f0", py: 1 }}>
-                      {formatDateTime(sale.createdAt)}
-                    </Box>
-                    <Box component="td" sx={{ borderBottom: "1px solid #f0f0f0", py: 1 }}>
-                      {sale.createdBy.name}
-                    </Box>
-                    <Box component="td" sx={{ borderBottom: "1px solid #f0f0f0", py: 1 }}>
-                      <Chip label={sale.status} size="small" color={statusColorMap[sale.status]} />
-                    </Box>
-                    <Box component="td" sx={{ borderBottom: "1px solid #f0f0f0", py: 1 }}>
-                      <Box display="flex" gap={0.5}>
-                        <IconButton size="small" color="primary" onClick={() => handleViewSale(sale)}>
-                          <Visibility />
-                        </IconButton>
-                        {canManageSales && (
-                          <>
-                            <IconButton size="small" color="primary" onClick={() => handleEditSale(sale)}>
-                              <Edit />
-                            </IconButton>
-                            <IconButton size="small" color="error" onClick={() => handleDeleteSale(sale)}>
-                              <Delete />
-                            </IconButton>
-                            <IconButton size="small" onClick={(e) => handleOpenStatusMenu(e, sale)}>
-                              <MoreVert />
-                            </IconButton>
-                          </>
-                        )}
+                <Box component="tbody">
+                  {filteredSales.map((sale) => (
+                    <Box component="tr" key={sale.id}>
+                      <Box component="td" sx={{ borderBottom: "1px solid #f0f0f0", py: 1 }}>
+                        {sale.product}
+                      </Box>
+                      <Box component="td" sx={{ borderBottom: "1px solid #f0f0f0", py: 1 }}>
+                        {formatCurrency(sale.requestedAmount)}
+                      </Box>
+                      <Box component="td" sx={{ borderBottom: "1px solid #f0f0f0", py: 1 }}>
+                        {sale.product === ProductType.CREDIT_CARD
+                          ? sale.franchise ?? "-"
+                          : sale.rate !== null && sale.rate !== undefined
+                            ? `${sale.rate.toFixed(2)}%`
+                            : "-"}
+                      </Box>
+                      <Box component="td" sx={{ borderBottom: "1px solid #f0f0f0", py: 1 }}>
+                        {formatDateTime(sale.createdAt)}
+                      </Box>
+                      <Box component="td" sx={{ borderBottom: "1px solid #f0f0f0", py: 1 }}>
+                        {sale.createdBy.name}
+                      </Box>
+                      <Box component="td" sx={{ borderBottom: "1px solid #f0f0f0", py: 1 }}>
+                        <Chip label={sale.status} size="small" color={statusColorMap[sale.status]} />
+                      </Box>
+                      <Box component="td" sx={{ borderBottom: "1px solid #f0f0f0", py: 1 }}>
+                        <Box display="flex" gap={0.5}>
+                          <IconButton size="small" color="primary" onClick={() => handleViewSale(sale)}>
+                            <Visibility />
+                          </IconButton>
+                          {canManageSales && (
+                            <>
+                              <IconButton size="small" color="primary" onClick={() => handleEditSale(sale)}>
+                                <Edit />
+                              </IconButton>
+                              <IconButton size="small" color="error" onClick={() => handleDeleteSale(sale)}>
+                                <Delete />
+                              </IconButton>
+                              <IconButton size="small" onClick={(e) => handleOpenStatusMenu(e, sale)}>
+                                <MoreVert />
+                              </IconButton>
+                            </>
+                          )}
+                        </Box>
                       </Box>
                     </Box>
-                  </Box>
-                ))}
-                {filteredSales.length === 0 && (
-                  <Box component="tr">
-                    <Box component="td" colSpan={7} textAlign="center" sx={{ py: 3 }}>
-                      No se encontraron ventas registradas.
+                  ))}
+                  {filteredSales.length === 0 && (
+                    <Box component="tr">
+                      <Box component="td" colSpan={7} textAlign="center" sx={{ py: 3 }}>
+                        No se encontraron ventas registradas.
+                      </Box>
                     </Box>
-                  </Box>
-                )}
+                  )}
+                </Box>
               </Box>
             </Box>
           )}
         </CardContent>
       </Card>
-
-      {totalCount > 0 && (
-        <Box display="flex" justifyContent="center" mt={2}>
-          <Pagination
-            count={Math.ceil(totalCount / pageSize)}
-            page={currentPage}
-            onChange={(_event, newPage) => {
-              dispatch(fetchSalesThunk({
-                product: filters.product || undefined,
-                createdFrom: filters.createdFrom || undefined,
-                createdTo: filters.createdTo || undefined,
-                page: newPage,
-                limit: pageSize,
-              }));
-            }}
-            color="primary"
-            showFirstButton
-            showLastButton
-          />
-        </Box>
-      )}
 
       <Menu
         anchorEl={statusMenuAnchorEl}

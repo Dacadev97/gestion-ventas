@@ -125,12 +125,12 @@ export function DashboardLayout() {
   );
 
   return (
-    <Box sx={{ display: "flex" }}>
+    <Box sx={{ display: "flex", width: "100%", minHeight: "100vh" }}>
       <AppBar
         component="nav"
         position="fixed"
         sx={{
-          width: { sm: `calc(100% - ${desktopDrawerWidth}px)` },
+          width: { xs: "100%", sm: `calc(100% - ${desktopDrawerWidth}px)` },
           ml: { sm: `${desktopDrawerWidth}px` },
           transition: (theme) => theme.transitions.create(["width", "margin"], {
             easing: theme.transitions.easing.sharp,
@@ -200,19 +200,21 @@ export function DashboardLayout() {
         component="main"
         sx={{
           flexGrow: 1,
-          p: 3,
-          width: { sm: `calc(100% - ${desktopDrawerWidth}px)` },
           ml: { sm: `${desktopDrawerWidth}px` },
-          transition: (theme) => theme.transitions.create(["margin", "width"], {
+          transition: (theme) => theme.transitions.create(["margin"], {
             easing: theme.transitions.easing.sharp,
             duration: theme.transitions.duration.standard,
           }),
+          minHeight: "100vh",
+          backgroundColor: "#f5f5f5",
+          p: 0,
+          overflow: "hidden",
         }}
       >
-        <Toolbar />
-        <Container maxWidth="lg">
+        <Toolbar sx={{ width: "100%", maxWidth: "100%" }} />
+        <Box sx={{ py: { xs: 2, md: 3 }, px: { xs: 2, sm: 3, md: 4 }, width: "100%", maxWidth: "100%" }}>
           <Outlet />
-        </Container>
+        </Box>
       </Box>
     </Box>
   );
