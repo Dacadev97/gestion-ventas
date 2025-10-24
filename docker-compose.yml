@@ -1,0 +1,44 @@
+version: "3.9"
+services:
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: ${DB_USERNAME:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+      POSTGRES_DB: ${DB_NAME:-konecta}
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+  backend:
+    build: ./backend
+    environment:
+      NODE_ENV: development
+      PORT: 4000
+      JWT_SECRET: change-me
+      JWT_EXPIRES_IN: 1h
+      CAPTCHA_TTL_SECONDS: 120
+      INITIAL_ADMIN_EMAIL: admin@konecta.local
+      INITIAL_ADMIN_PASSWORD: Konecta#2024
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres
+      DB_NAME: konecta
+    depends_on:
+      - db
+    ports:
+      - "4000:4000"
+
+  frontend:
+    build: ./frontend
+    environment:
+      - VITE_API_BASE_URL=http://localhost:4000/api
+    depends_on:
+      - backend
+    ports:
+      - "5173:80"
+
+volumes:
+  db_data: {}
