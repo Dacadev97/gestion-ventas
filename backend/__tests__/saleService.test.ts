@@ -3,6 +3,7 @@ import { SaleService } from '../src/services/SaleService';
 import { UserService } from '../src/services/UserService';
 import { RoleName } from '../src/entities/Role';
 import { ProductType } from '../src/entities/Sale';
+import { seedInitialData } from '../src/bootstrap/seeds';
 
 describe('SaleService', () => {
   let saleService: SaleService;
@@ -12,6 +13,10 @@ describe('SaleService', () => {
     if (!AppDataSource.isInitialized) {
       await AppDataSource.initialize();
     }
+    
+    // Seed roles necesarios para los tests
+    await seedInitialData();
+    
     saleService = new SaleService();
     userService = new UserService();
   });
