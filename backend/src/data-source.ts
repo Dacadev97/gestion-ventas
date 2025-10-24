@@ -17,4 +17,9 @@ export const AppDataSource = new DataSource({
   entities: [Role, User, Sale],
   synchronize: true,
   logging: env.nodeEnv !== "production",
+  connectTimeoutMS: 30000, // 30 segundos para conectar
+  extra: {
+    max: 10, // máximo de conexiones
+    connectionTimeoutMillis: 30000,
+  },
 });

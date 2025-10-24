@@ -10,7 +10,7 @@ COPY package.json package-lock.json* ./
 RUN npm ci
 COPY tsconfig.json ./tsconfig.json
 COPY src ./src
-RUN npm run build
+RUN npm run build && ls -la dist/
 
 FROM node:20-alpine AS runner
 WORKDIR /app

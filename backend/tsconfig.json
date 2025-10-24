@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "rootDir": "./",
+    "rootDir": "./src",
     "outDir": "./dist",
 
     "module": "commonjs",
@@ -21,6 +21,6 @@
     "strict": true,
     "skipLibCheck": true
   },
-  "include": ["src/**/*", "__tests__/**/*", "jest.config.ts"],
-  "exclude": ["node_modules", "dist"]
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist", "__tests__", "jest.config.ts"]
 }
