@@ -5,12 +5,17 @@ import type {
   SalesListResponse,
   UpdateSalePayload,
   Sale,
+  SaleStatus,
 } from "../types";
 
 export const fetchSales = async (params?: {
   product?: ProductType;
   createdFrom?: string;
   createdTo?: string;
+  page?: number;
+  limit?: number;
+  sortBy?: string;
+  sortOrder?: "ASC" | "DESC";
 }): Promise<SalesListResponse> => {
   const { data } = await http.get<SalesListResponse>("/sales", { params });
   return data;

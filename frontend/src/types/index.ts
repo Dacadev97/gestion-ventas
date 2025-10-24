@@ -64,6 +64,9 @@ export interface Sale {
 export interface SalesListResponse {
   data: Sale[];
   totalRequestedAmount: number;
+  count: number;
+  page: number;
+  limit: number;
 }
 
 export interface CreateUserPayload {

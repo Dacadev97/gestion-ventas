@@ -45,7 +45,7 @@ export function SalesPage() {
   const dispatch = useAppDispatch();
   const salesState = useAppSelector((state) => state.sales);
   const authState = useAppSelector((state) => state.auth);
-  const { list, totalRequestedAmount, status } = salesState;
+  const { list, totalRequestedAmount, totalCount, currentPage, pageSize, status } = salesState;
   const { token } = authState;
   const [selectedSale, setSelectedSale] = useState<Sale | null>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -53,8 +53,11 @@ export function SalesPage() {
   const [detailSale, setDetailSale] = useState<Sale | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [statusMenuAnchorEl, setStatusMenuAnchorEl] = useState<null | HTMLElement>(null);
-  const [page, setPage] = useState(1);
-  const [limit] = useState(10);
+  const [filters, setFilters] = useState<SalesFilters>({
+    product: "",
+    createdFrom: "",
+    createdTo: "",
+  });
 
   const handleOpenStatusMenu = (event: React.MouseEvent<HTMLButtonElement>, sale: Sale) => {
     setSelectedSale(sale);
@@ -94,26 +97,31 @@ export function SalesPage() {
   });
 
   useEffect(() => {
-    dispatch(fetchSalesThunk(undefined));
+    const params = {
+      product: filters.product || undefined,
+      createdFrom: filters.createdFrom || undefined,
+      createdTo: filters.createdTo || undefined,
+      page: currentPage,
+      limit: pageSize,
+    };
+    dispatch(fetchSalesThunk(params));
 
     return () => {
       dispatch(clearSalesState());
     };
-  }, [dispatch]);
+  }, [dispatch, currentPage, pageSize, filters]);
 
   const onSubmitFilters = (values: SalesFilters) => {
-    const params = {
-      product: values.product || undefined,
-      createdFrom: values.createdFrom || undefined,
-      createdTo: values.createdTo || undefined,
-    };
-
-    dispatch(fetchSalesThunk(params));
+    setFilters({
+      product: values.product,
+      createdFrom: values.createdFrom,
+      createdTo: values.createdTo,
+    });
   };
 
   const resetFilters = () => {
     reset({ product: "", createdFrom: "", createdTo: "" });
-    dispatch(fetchSalesThunk(undefined));
+    setFilters({ product: "", createdFrom: "", createdTo: "" });
   };
 
   const handleCreateSale = () => {
@@ -379,6 +387,27 @@ export function SalesPage() {
           )}
         </CardContent>
       </Card>
+
+      {totalCount > 0 && (
+        <Box display="flex" justifyContent="center" mt={2}>
+          <Pagination
+            count={Math.ceil(totalCount / pageSize)}
+            page={currentPage}
+            onChange={(_event, newPage) => {
+              dispatch(fetchSalesThunk({
+                product: filters.product || undefined,
+                createdFrom: filters.createdFrom || undefined,
+                createdTo: filters.createdTo || undefined,
+                page: newPage,
+                limit: pageSize,
+              }));
+            }}
+            color="primary"
+            showFirstButton
+            showLastButton
+          />
+        </Box>
+      )}
 
       <Menu
         anchorEl={statusMenuAnchorEl}

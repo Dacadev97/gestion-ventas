@@ -4,10 +4,18 @@ import {
   createSale,
   deleteSale,
   fetchSales,
+  fetchSaleById,
   updateSale,
   updateSaleStatus,
 } from "../../api/sales.ts";
-import type { CreateSalePayload, Sale, SaleStatus, UpdateSalePayload } from "../../types";
+import type {
+  CreateSalePayload,
+  Sale,
+  SaleStatus,
+  UpdateSalePayload,
+  ProductType,
+  SalesListResponse,
+} from "../../types";
 import type { RootState } from "../../store";
 
 type SalesStatus = "idle" | "loading" | "succeeded" | "failed";
@@ -15,6 +23,9 @@ type SalesStatus = "idle" | "loading" | "succeeded" | "failed";
 interface SalesState {
   list: Sale[];
   totalRequestedAmount: number;
+  totalCount: number;
+  currentPage: number;
+  pageSize: number;
   selectedSale: Sale | null;
   status: SalesStatus;
   error: string | null;
@@ -23,6 +34,9 @@ interface SalesState {
 const initialState: SalesState = {
   list: [],
   totalRequestedAmount: 0,
+  totalCount: 0,
+  currentPage: 1,
+  pageSize: 10,
   selectedSale: null,
   status: "idle",
   error: null,
@@ -30,7 +44,15 @@ const initialState: SalesState = {
 
 export const fetchSalesThunk = createAsyncThunk<
   SalesListResponse,
-  { product?: ProductType; createdFrom?: string; createdTo?: string } | undefined
+  {
+    product?: ProductType;
+    createdFrom?: string;
+    createdTo?: string;
+    page?: number;
+    limit?: number;
+    sortBy?: string;
+    sortOrder?: "ASC" | "DESC";
+  } | undefined
 >("sales/fetchAll", async (params, { rejectWithValue }) => {
   try {
     return await fetchSales(params);
@@ -138,10 +160,16 @@ const salesSlice = createSlice({
         state.status = "succeeded";
         state.list = action.payload.data;
         state.totalRequestedAmount = action.payload.totalRequestedAmount;
+        state.totalCount = action.payload.count;
+        state.currentPage = action.payload.page;
+        state.pageSize = action.payload.limit;
       })
       .addCase(fetchSalesThunk.rejected, (state, action) => {
         state.status = "failed";
-        state.error = action.payload ?? "Ocurrió un error inesperado";
+        state.error =
+          typeof action.payload === "string"
+            ? action.payload
+            : action.error?.message ?? "Ocurrió un error inesperado";
       })
       .addCase(createSaleThunk.fulfilled, (state, action) => {
         state.list.unshift(action.payload);
