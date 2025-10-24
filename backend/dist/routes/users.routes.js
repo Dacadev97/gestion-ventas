@@ -1,0 +1,20 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.userRouter = void 0;
+const express_1 = require("express");
+const UserController_1 = require("../controllers/UserController");
+const asyncHandler_1 = require("../middlewares/asyncHandler");
+const authMiddleware_1 = require("../middlewares/authMiddleware");
+const validationMiddleware_1 = require("../middlewares/validationMiddleware");
+const userValidators_1 = require("../validators/userValidators");
+const Role_1 = require("../entities/Role");
+const router = (0, express_1.Router)();
+exports.userRouter = router;
+const controller = new UserController_1.UserController();
+router.use(authMiddleware_1.authenticate, (0, authMiddleware_1.authorize)(Role_1.RoleName.ADMIN));
+router.get("/", (0, asyncHandler_1.asyncHandler)(controller.list));
+router.get("/:id", (0, asyncHandler_1.asyncHandler)(controller.getById));
+router.post("/", userValidators_1.createUserValidator, validationMiddleware_1.validateRequest, (0, asyncHandler_1.asyncHandler)(controller.create));
+router.put("/:id", userValidators_1.updateUserValidator, validationMiddleware_1.validateRequest, (0, asyncHandler_1.asyncHandler)(controller.update));
+router.delete("/:id", (0, asyncHandler_1.asyncHandler)(controller.delete));
+//# sourceMappingURL=users.routes.js.map

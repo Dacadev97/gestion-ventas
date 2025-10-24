@@ -1,0 +1,20 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.saleRouter = void 0;
+const express_1 = require("express");
+const SaleController_1 = require("../controllers/SaleController");
+const asyncHandler_1 = require("../middlewares/asyncHandler");
+const authMiddleware_1 = require("../middlewares/authMiddleware");
+const validationMiddleware_1 = require("../middlewares/validationMiddleware");
+const saleValidators_1 = require("../validators/saleValidators");
+const Role_1 = require("../entities/Role");
+const router = (0, express_1.Router)();
+exports.saleRouter = router;
+const controller = new SaleController_1.SaleController();
+router.use(authMiddleware_1.authenticate, (0, authMiddleware_1.authorize)(Role_1.RoleName.ADMIN, Role_1.RoleName.ADVISOR));
+router.get("/", saleValidators_1.saleFiltersValidator, validationMiddleware_1.validateRequest, (0, asyncHandler_1.asyncHandler)(controller.list));
+router.get("/:id", (0, asyncHandler_1.asyncHandler)(controller.getById));
+router.post("/", saleValidators_1.createSaleValidator, validationMiddleware_1.validateRequest, (0, asyncHandler_1.asyncHandler)(controller.create));
+router.put("/:id", saleValidators_1.updateSaleValidator, validationMiddleware_1.validateRequest, (0, asyncHandler_1.asyncHandler)(controller.update));
+router.delete("/:id", (0, asyncHandler_1.asyncHandler)(controller.delete));
+//# sourceMappingURL=sales.routes.js.map
