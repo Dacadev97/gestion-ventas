@@ -71,6 +71,7 @@ export function UserFormDialog({ open, initialValues, isEdit = false, onClose, o
 
   const submit = (values: UserFormValues) => {
     if (isEdit && !values.password) {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { password, ...rest } = values;
       onSubmit(rest as UserFormValues);
     } else {
