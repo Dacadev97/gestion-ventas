@@ -516,7 +516,7 @@ Al iniciar el sistema por primera vez, se crea automáticamente:
 
 **Administrador:**
 - Email: `admin@konecta.local` (configurable en `.env`)
-- Password: `Konecta#2024` (configurable en `.env`)
+- Password: `H6ZeoOhnoaC1xpDpgsFTJw==` (configurable en `.env`)
 
 Desde esta cuenta puedes crear más usuarios (asesores o administradores).
 

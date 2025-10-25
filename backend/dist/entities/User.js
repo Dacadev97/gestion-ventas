@@ -14,6 +14,16 @@ const typeorm_1 = require("typeorm");
 const Role_1 = require("./Role");
 const Sale_1 = require("./Sale");
 let User = class User {
+    toJSON() {
+        return {
+            id: this.id,
+            name: this.name,
+            email: this.email,
+            role: this.role.name,
+            createdAt: this.createdAt,
+            updatedAt: this.updatedAt,
+        };
+    }
 };
 exports.User = User;
 __decorate([
