@@ -1,11 +1,84 @@
 # 🏦 Sistema de Gestión de Ventas Bancarias
 
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue.svg)](https://www.typescriptlang.org/)
-[![Node.js](https://img.shields.io/badge/Node.js-20+-green.svg)](https://nodejs.org/)
-[![React](https://img.shields.io/badge/React-19.1-61dafb.svg)](https://reactjs.org/)
-[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-14+-336791.svg)](https://www.postgresql.org/)
+![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)
+![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)
+![Express](https://img.shields.io/badge/Express-000000?style=for-the-badge&logo=express&logoColor=white)
+![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
+![Redux](https://img.shields.io/badge/Redux-593D88?style=for-the-badge&logo=redux&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)
+![Google Cloud](https://img.shields.io/badge/Google_Cloud-4285F4?style=for-the-badge&logo=google-cloud&logoColor=white)
+[![CI/CD](https://github.com/Dacadev97/gestion-ventas/actions/workflows/ci.yml/badge.svg)](https://github.com/Dacadev97/gestion-ventas/actions/workflows/ci.yml)
 
 Sistema completo de gestión de ventas para entidades bancarias, desarrollado con Node.js (Express + TypeORM) en el backend y React (Vite + TypeScript + Redux Toolkit) en el frontend. Incluye autenticación JWT, sistema de roles, captcha de seguridad, módulo de estadísticas y gestión completa de usuarios y ventas.
+
+## 📸 Capturas de Pantalla
+
+<div align="center">
+
+### 🔐 Pantalla de Login con Captcha
+![Login](docs/screenshots/01-login.png)
+
+*Autenticación segura con captcha SVG generado dinámicamente*
+
+---
+
+### 📊 Gestión de Ventas
+![Lista de Ventas](docs/screenshots/sales-list.png)
+
+*Listado completo de ventas con filtros avanzados, paginación y totalizador de cupos*
+
+---
+
+### � Formulario de Radicar Venta (Tarjeta de Crédito)
+![Formulario Tarjeta](docs/screenshots/create-sale-form.png)
+
+*Formulario con campos condicionales: Franquicia para tarjetas de crédito*
+
+---
+
+### 📝 Formulario de Radicar Venta (Crédito de Consumo)
+![Formulario Crédito](docs/screenshots/create-sale-credit.png)
+
+*Formulario con campos condicionales: Tasa de interés para créditos*
+
+---
+
+### 👁️ Detalle de Venta
+![Detalle de Venta](docs/screenshots/sale-detail.png)
+
+*Visualización completa de información de la venta con auditoría*
+
+---
+
+### 👥 Gestión de Usuarios
+![Usuarios](docs/screenshots/users-list.png)
+
+*Administración de usuarios con control de roles y permisos (Solo Admin)*
+
+---
+
+### 📈 Módulo de Estadísticas
+![Estadísticas](docs/screenshots/statistics.png)
+
+*Dashboards interactivos con gráficas por asesor, producto y línea temporal*
+
+</div>
+
+> **💡 Tip**: Puedes probar la aplicación en vivo usando las credenciales proporcionadas en la [sección de Demo](#-demo-en-vivo)
+
+## 🌐 Demo en Vivo
+
+Prueba la aplicación desplegada en Google Cloud Run:
+
+- **Frontend**: [https://konecta-frontend-512974314058.us-central1.run.app/](https://konecta-frontend-512974314058.us-central1.run.app/)
+- **Backend Health Check**: [https://konecta-backend-512974314058.us-central1.run.app/health](https://konecta-backend-512974314058.us-central1.run.app/health)
+
+**Credenciales de Administrador:**
+- **Email**: `admin@konecta.local`
+- **Password**: `H6ZeoOhnoaC1xpDpgsFTJw==`
+
+> **Nota**: Desde la cuenta de administrador puedes crear nuevos usuarios con rol "Asesor" para probar los diferentes flujos de permisos.
 
 ## 📋 Tabla de Contenidos
 
