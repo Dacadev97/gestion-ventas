@@ -48,10 +48,14 @@ export class SaleService {
   }
 
   async getById(id: number): Promise<Sale> {
-    const sale = await this.saleRepository.findOne({
-      where: { id },
-      relations: { createdBy: true, updatedBy: true },
-    });
+    const sale = await this.saleRepository
+      .createQueryBuilder("sale")
+      .leftJoinAndSelect("sale.createdBy", "createdBy")
+      .leftJoinAndSelect("createdBy.role", "createdByRole")
+      .leftJoinAndSelect("sale.updatedBy", "updatedBy")
+      .leftJoinAndSelect("updatedBy.role", "updatedByRole")
+      .where("sale.id = :id", { id })
+      .getOne();
 
     if (!sale) {
       throw new AppError("Venta no encontrada", 404);
@@ -132,7 +136,9 @@ export class SaleService {
     return this.saleRepository
       .createQueryBuilder("sale")
       .leftJoinAndSelect("sale.createdBy", "createdBy")
+      .leftJoinAndSelect("createdBy.role", "createdByRole")
       .leftJoinAndSelect("sale.updatedBy", "updatedBy")
+      .leftJoinAndSelect("updatedBy.role", "updatedByRole")
       .orderBy("sale.created_at", "DESC");
   }
 
@@ -142,8 +148,7 @@ export class SaleService {
     }
 
     if (filters.createdById) {
-      // Filtrar por el autor usando la columna directa para evitar depender del alias del join
-      qb.andWhere("sale.created_by = :createdById", { createdById: filters.createdById });
+      qb.andWhere("createdBy.id = :createdById", { createdById: filters.createdById });
     }
 
     if (filters.createdFrom) {

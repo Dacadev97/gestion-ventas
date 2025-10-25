@@ -5,6 +5,7 @@ import { captchaService } from "../services";
 import { UserService } from "../services/UserService";
 import { comparePassword } from "../utils/password";
 import { signAccessToken } from "../utils/jwt";
+import { env } from "../config/env";
 
 const mapUserResponse = (user: Awaited<ReturnType<UserService["getById"]>>) => ({
   id: user.id,
@@ -67,5 +68,26 @@ export class AuthController {
 
     const user = await this.userService.getById(authUser.id);
     return res.json(mapUserResponse(user));
+  };
+
+  // Endpoint de utilidad solo en desarrollo para obtener un token sin captcha
+  devToken = async (req: Request, res: Response) => {
+    if (env.nodeEnv === "production") {
+      throw new AppError("No autorizado", 401);
+    }
+
+    const { sub, email, role } = req.query as {
+      sub?: string;
+      email?: string;
+      role?: string;
+    };
+
+    const id = sub ? Number(sub) : 1;
+    const mail = email ?? env.initialAdminEmail;
+    const roleName = (role ?? "Administrador") as any;
+
+    const token = signAccessToken({ sub: id, email: mail, role: roleName });
+
+    res.json({ token });
   };
 }

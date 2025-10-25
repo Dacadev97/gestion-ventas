@@ -29,11 +29,14 @@ export class SaleController {
       sortOrder?: "ASC" | "DESC";
     };
 
+    const toEndOfDay = (date: Date) => new Date(date.getFullYear(), date.getMonth(), date.getDate(), 23, 59, 59, 999);
+
     const filters = {
       product,
       createdFrom: createdFrom ? new Date(createdFrom) : undefined,
-      createdTo: createdTo ? new Date(createdTo) : undefined,
-      createdById: user.role === RoleName.ADVISOR ? user.id : undefined,
+      createdTo: createdTo ? toEndOfDay(new Date(createdTo)) : undefined,
+      // Requisito: asesores deben poder ver todas las ventas, no filtrar por autor
+      createdById: undefined,
       page: page ? Number(page) : undefined,
       limit: limit ? Number(limit) : undefined,
       sortBy,
@@ -70,9 +73,7 @@ export class SaleController {
 
     const sale = await this.saleService.getById(id);
 
-    if (user.role === RoleName.ADVISOR && sale.createdBy.id !== user.id) {
-      throw new AppError("No tienes permisos para ver esta venta", 403);
-    }
+    // Requisito: asesores pueden ver cualquier venta (pero no necesariamente editar)
 
     res.json(sale);
   };
