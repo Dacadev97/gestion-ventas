@@ -93,25 +93,11 @@ Sistema completo de gestión de ventas para entidades bancarias, desarrollado co
 
 ### 1. Clonar el repositorio
 
-```bash
-git clone https://github.com/Dacadev97/gestion-ventas.git
-cd gestion-ventas
-```
-
-### 2. Configurar variables de entorno
-
 Copia los archivos de ejemplo y ajústalos según tu entorno:
 
 ```bash
-cp backend/.env.example backend/.env
-cp frontend/.env.example frontend/.env
-```
 
 ### Backend (`backend/.env`)
-
-```env
-# Servidor
-PORT=4000
 
 # JWT
 JWT_SECRET=define-una-clave-segura-y-compleja
@@ -119,10 +105,6 @@ JWT_EXPIRES_IN=1h
 
 # Captcha
 CAPTCHA_TTL_SECONDS=120
-
-# Usuario administrador inicial
-INITIAL_ADMIN_EMAIL=admin@konecta.local
-INITIAL_ADMIN_PASSWORD=Konecta#2024
 
 # Base de datos PostgreSQL
 DB_HOST=localhost
@@ -205,7 +187,7 @@ docker-compose down
 ```
 
 Servicios disponibles:
-- **Frontend**: http://localhost:3000
+- **Frontend**: http://localhost:5173
 - **Backend**: http://localhost:4000/api
 - **PostgreSQL**: localhost:5432
 
@@ -327,8 +309,9 @@ konecta/
 │
 ├── .github/
 │   └── workflows/
-│       ├── ci.yml              # Pipeline CI
-│       └── deploy-cloudrun.yml # Deployment (opcional)
+│       ├── ci.yml                     # Pipeline CI
+│       ├── deploy-cloudrun.yml        # Deploy Backend a Cloud Run
+│       └── deploy-frontend.yml        # Deploy Frontend a Cloud Run (depende del backend)
 ├── docker-compose.yml
 └── README.md
 ```
@@ -433,24 +416,37 @@ Despliegue automático a Google Cloud Run:
 
 **Configuración rápida:**
 ```bash
-# Opción 1: Script automatizado (recomendado)
+#  Script automatizado (recomendado)
 ./setup-gcp.sh
 
-# Opción 2: Manual - Ver DEPLOYMENT_GUIDE.md
 ```
 
-**Secretos requeridos en GitHub:**
+**Secretos requeridos en GitHub (Backend):**
 - `GCP_SA_KEY`: Service Account key (JSON completo)
 - `GCP_PROJECT_ID`: tech-dx-471318
 - `CLOUD_RUN_REGION`: us-central1
 - `CLOUD_RUN_SERVICE`: konecta-backend
-- `ARTIFACT_REGISTRY_REPO`: konecta-repo
-- `CLOUD_SQL_CONNECTION_NAME`: tech-dx-471318:us-central1:konecta-db
-- `BACKEND_ENV_VARS`: Variables de entorno (ver guía)
+- `ARTIFACT_REGISTRY_REPO`: konecta-backend-repo
+- `CLOUD_SQL_CONNECTION_NAME`: tech-dx-471318:us-central1:konecta-database
+- `BACKEND_ENV_VARS`: Variables de entorno (NO incluir PORT)
 
-**📚 Documentación completa:**
-- **[QUICKSTART_GCP.md](./QUICKSTART_GCP.md)** - Setup rápido con script automatizado
-- **[DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md)** - Guía completa paso a paso
+**Secretos requeridos en GitHub (Frontend):**
+- `ARTIFACT_REGISTRY_REPO_FRONTEND`: konecta-frontend-repo
+- `CLOUD_RUN_SERVICE_FRONTEND`: konecta-frontend
+- `BACKEND_URL`: URL pública del backend + "/api"
+
+Pasos rápidos (Cloud Run):
+1) Ejecuta `./setup-gcp.sh` para crear infraestructura y generar el archivo con secrets.
+2) Carga los secrets en GitHub (Settings → Secrets and variables → Actions).
+3) Push a `main` para desplegar el backend. Obtén su URL:
+   ```bash
+   gcloud run services describe konecta-backend \
+     --region us-central1 \
+     --format="value(status.url)"
+   ```
+4) Actualiza `BACKEND_URL` con `<URL_BACKEND>/api`.
+5) Ejecuta el workflow "Deploy Frontend to Cloud Run" (automático tras backend success o manualmente).
+6) Verifica ambos servicios accediendo a las URLs desplegadas.
 
 ## 🌐 Despliegue en Google Cloud Run
 
@@ -470,14 +466,28 @@ El script creará automáticamente:
 - ✅ Passwords seguros generados automáticamente
 - ✅ Archivo con todos los secrets para GitHub
 
-### Deployment Manual
+### Deployment Manual (todo aquí mismo)
 
-Si prefieres configurar manualmente o necesitas más control:
+Si prefieres configurar manualmente o necesitas más control, estos son los pasos mínimos:
 
-1. **Lee la guía completa**: [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md)
-2. **Quick Start**: [QUICKSTART_GCP.md](./QUICKSTART_GCP.md)
+1. Crear los recursos en GCP (Artifact Registry, Cloud SQL, Service Account) con el script o manualmente.
+2. En GitHub → Settings → Secrets and variables → Actions, crear los secrets requeridos (ver lista arriba) con los valores de tu proyecto.
+3. Desplegar el backend (push a main o ejecutar el workflow "Deploy Backend to Cloud Run").
+4. Obtener la URL del backend y actualizar el secret `BACKEND_URL` con `<URL_BACKEND>/api`.
+5. Desplegar el frontend (se dispara automáticamente tras el backend success o ejecútalo manualmente).
+6. Verificar:
+  - Backend: `GET <URL_BACKEND>/health` → `{ "status": "ok" }`
+  - Frontend: abrir la URL de Cloud Run y probar login y ventas.
 
 ### Verificar Deployment
+
+Backend desplegado (Cloud Run):
+
+https://konecta-backend-512974314058.us-central1.run.app/health
+
+Frontend desplegado (Cloud Run):
+
+https://konecta-frontend-512974314058.us-central1.run.app/
 
 ```bash
 # Ver servicios desplegados
@@ -538,6 +548,32 @@ lsof -ti:5173 | xargs kill -9
 # Frontend: aumentar heap size
 NODE_OPTIONS="--max-old-space-size=4096" npm --prefix frontend test
 ```
+
+### Despliegue en Cloud Run: problemas comunes
+
+- Error: "The following reserved env names were provided: PORT"
+  - Causa: Intentar definir `PORT` en Cloud Run. Ese valor lo establece Google.
+  - Solución: Quita `PORT` de `BACKEND_ENV_VARS` y vuelve a desplegar.
+
+- Error: "Cannot find module '/app/dist/index.js'"
+  - Causa: El build de TypeScript no generó `dist/` correctamente en el contenedor.
+  - Solución: Asegúrate de que `tsconfig.json` tenga `rootDir: ./src` y que el Dockerfile build copie desde el stage builder:
+    - `RUN npm run build`
+    - `COPY --from=builder /app/dist ./dist`
+
+- Error: "relation 'roles' does not exist" (TypeORM)
+  - Causa: La base de datos está vacía y las tablas no se han creado.
+  - Soluciones:
+    1) Temporal: habilitar `synchronize: true` para crear tablas en el primer despliegue.
+    2) Recomendado: crear migraciones y aplicarlas en el startup.
+
+- El contenedor no arranca a tiempo (HealthCheckContainerError)
+  - Solución: Aumentar el timeout del servicio y evitar throttling inicial (ya configurado en el workflow con `--timeout 300` y `--no-cpu-throttling`).
+
+- Conexión a Cloud SQL falla
+  - Revisa que `CLOUD_SQL_CONNECTION_NAME` tenga formato `project:region:instance`.
+  - Usa socket Unix: `DB_HOST=/cloudsql/<connection_name>`.
+  - Da rol `roles/cloudsql.client` al Service Account de despliegue.
 
 ## 📝 Licencia
 

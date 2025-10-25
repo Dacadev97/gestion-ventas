@@ -15,7 +15,12 @@ exports.AppDataSource = new typeorm_1.DataSource({
     password: env_1.env.db.password,
     database: env_1.env.db.database,
     entities: [Role_1.Role, User_1.User, Sale_1.Sale],
-    synchronize: env_1.env.nodeEnv !== "production",
+    synchronize: true,
     logging: env_1.env.nodeEnv !== "production",
+    connectTimeoutMS: 30000,
+    extra: {
+        max: 10,
+        connectionTimeoutMillis: 30000,
+    },
 });
 //# sourceMappingURL=data-source.js.map

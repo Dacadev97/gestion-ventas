@@ -13,8 +13,8 @@ exports.loginValidator = [
     (0, express_validator_1.body)("password")
         .isString()
         .withMessage("La contraseña es requerida")
-        .isLength({ min: 6, max: 20 })
-        .withMessage("La contraseña debe tener entre 6 y 20 caracteres"),
+        .isLength({ min: 6, max: 128 })
+        .withMessage("La contraseña debe tener entre 6 y 128 caracteres"),
     (0, express_validator_1.body)("captchaId")
         .isUUID()
         .withMessage("El captchaId debe ser un UUID válido"),

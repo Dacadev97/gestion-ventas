@@ -20,8 +20,8 @@ exports.createUserValidator = [
     (0, express_validator_1.body)("password")
         .isString()
         .withMessage("La contraseña es obligatoria")
-        .isLength({ min: 6, max: 20 })
-        .withMessage("La contraseña debe tener entre 6 y 20 caracteres"),
+        .isLength({ min: 6, max: 128 })
+        .withMessage("La contraseña debe tener entre 6 y 128 caracteres"),
     (0, express_validator_1.body)("role")
         .isIn(roleValues)
         .withMessage("El rol debe ser Administrador o Asesor"),
@@ -45,8 +45,8 @@ exports.updateUserValidator = [
         .optional({ values: "falsy" })
         .isString()
         .withMessage("La contraseña debe ser un texto")
-        .isLength({ min: 6, max: 20 })
-        .withMessage("La contraseña debe tener entre 6 y 20 caracteres"),
+        .isLength({ min: 6, max: 128 })
+        .withMessage("La contraseña debe tener entre 6 y 128 caracteres"),
     (0, express_validator_1.body)("role")
         .optional({ values: "falsy" })
         .isIn(roleValues)
