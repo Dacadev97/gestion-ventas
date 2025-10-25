@@ -87,7 +87,8 @@ class SaleService {
             qb.andWhere("sale.product = :product", { product: filters.product });
         }
         if (filters.createdById) {
-            qb.andWhere("createdBy.id = :createdById", { createdById: filters.createdById });
+            // Filtrar por el autor usando la columna directa para evitar depender del alias del join
+            qb.andWhere("sale.created_by = :createdById", { createdById: filters.createdById });
         }
         if (filters.createdFrom) {
             qb.andWhere("sale.created_at >= :createdFrom", { createdFrom: filters.createdFrom });
